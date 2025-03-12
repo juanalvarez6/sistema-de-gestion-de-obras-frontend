@@ -5,6 +5,7 @@ import WorkerPanel from '../views/WorkerPanel/WorkerPanel';
 import MaterialRequests from '../views/MaterialRequests/MaterialRequests';
 import TaskManagement from '../views/TaskManagement/TaskManagement';
 import Reports from '../views/Reports/Reports';
+import Register from '../views/Login/register/Register';
 import App from '../App';
 
 
@@ -13,6 +14,7 @@ const AppRoutes = () => {
             <Routes>
                 <Route path='/' element={<App/>}></Route>
                 <Route path='/login' element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/worker-panel" element={<WorkerPanel />} />
                 <Route path="/material-requests" element={<MaterialRequests />} />
