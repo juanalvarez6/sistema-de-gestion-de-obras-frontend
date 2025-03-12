@@ -1,9 +1,12 @@
-const TaskManagement = () => {
-    return (
-        <>
-        <h1>TaskManagement</h1>
-        </>
-    );
-}
+import PendingTasks from "./PendingTask"; // Importamos la nueva vista
 
-export default TaskManagement
+const TaskManagement = () => {
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-center mb-6 mt-12" >Gestión de Tareas</h1>
+      <PendingTasks /> {/* Mostramos la lista de tareas pendientes */}
+    </div>
+  );
+};
+
+export default TaskManagement;

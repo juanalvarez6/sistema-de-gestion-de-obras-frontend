@@ -115,6 +115,29 @@ const MaterialRequestsForm = () => {
           </select>
         </div>
 
+        {/* Comentarios adicionales */}
+<div className="flex flex-col">
+  <label htmlFor="comments" className="text-lg text-gray-600 mb-2">Comentarios adicionales</label>
+  <textarea
+    id="comments"
+    rows={3}
+    className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    placeholder="añade tu comentario"
+  />
+</div>
+
+
+        {/* Fecha de entrega */}
+        <div className="flex flex-col">
+          <label htmlFor="deliveryDate" className="text-lg text-gray-600 mb-2">Fecha de entrega estimada</label>
+          <input
+            type="date"
+            id="deliveryDate"
+           className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        </div>
+
+
         {/* Botón de submit */}
         <div className="flex justify-center">
           <button
