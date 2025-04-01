@@ -4,9 +4,11 @@ import Dashboard from '../views/Dashboard/Dashboard';
 import WorkerPanel from '../views/WorkerPanel/WorkerPanel';
 import MaterialRequests from '../views/MaterialRequests/MaterialRequests';
 import TaskManagement from '../views/TaskManagement/TaskManagement';
+import PasswordRecovery from '../views/Login/PasswordRecovery';
 import Reports from '../views/Reports/Reports';
 import Register from '../views/Login/register/Register';
 import App from '../App';
+
 
 
 const AppRoutes = () => {
@@ -20,6 +22,7 @@ const AppRoutes = () => {
                 <Route path="/material-requests" element={<MaterialRequests />} />
                 <Route path="/task-management" element={<TaskManagement />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path= "/password-recovery" element={<PasswordRecovery />} />
             </Routes>
     );
 }
