@@ -18,7 +18,13 @@ const Projects = () => {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState("");
-  const [newProject, setNewProject] = useState({ nombre: "", descripcion: "", estado: "EN_PROGRESO" });
+  const [newProject, setNewProject] = useState<Project>({
+    id: 0, // Se cambiará antes de agregarlo
+    nombre: "",
+    descripcion: "",
+    estado: "EN_PROGRESO",
+  });
+  
 
   const filteredProjects = projects
     .filter((p) => p.nombre.toLowerCase().includes(search.toLowerCase()))
@@ -27,8 +33,9 @@ const Projects = () => {
   const addProject = () => {
     if (!newProject.nombre.trim() || !newProject.descripcion.trim()) return;
     const newId = projects.length ? Math.max(...projects.map((p) => p.id)) + 1 : 1;
-    setProjects([...projects, { id: newId, ...newProject }]);
-    setNewProject({ nombre: "", descripcion: "", estado: "EN_PROGRESO" });
+    setProjects([...projects, { ...newProject, id: newId }]);
+setNewProject({ id: 0, nombre: "", descripcion: "", estado: "EN_PROGRESO" });
+
   };
 
   return (
@@ -103,7 +110,13 @@ const Projects = () => {
         <select
           className="w-full px-3 py-2 border rounded-md mb-2"
           value={newProject.estado}
-          onChange={(e) => setNewProject({ ...newProject, estado: e.target.value })}
+          onChange={(e) =>
+            setNewProject({
+              ...newProject,
+              estado: e.target.value as "EN_PROGRESO" | "FINALIZADO" | "SUSPENDIDO",
+            })
+          }
+          
         >
           <option value="EN_PROGRESO">En Progreso</option>
           <option value="FINALIZADO">Finalizado</option>
