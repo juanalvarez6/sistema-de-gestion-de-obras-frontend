@@ -1,15 +1,9 @@
 import './App.css'
 import {Link} from 'react-router-dom'
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import ProjectService from './services/ProjectService'
-import TaskService from './services/TaskService'
 
 function App() {
 
-  const queryClient = new QueryClient();
-
   return (
-    <QueryClientProvider client={queryClient}>
       <>
         <h1 className='text-3xl font-bold m-8'>Home</h1>
         <div className='flex justify-around m-8'>
@@ -21,10 +15,8 @@ function App() {
             <Link to='/reports' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>Reports</Link>
         </div>
         <div>
-          <ProjectService />
         </div>
       </>
-    </QueryClientProvider>
   )
 }
 

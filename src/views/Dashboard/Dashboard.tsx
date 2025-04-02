@@ -1,4 +1,4 @@
-import Projects from "./Projects";
+import ProjectsList from "./ProjectList";
 import UsersList from "./UsersList";
 
 const  Dashboard = () => {
@@ -6,7 +6,7 @@ const  Dashboard = () => {
         <>
         <h1>Dashboard</h1>
         <UsersList />
-        <Projects />
+        <ProjectsList />
         </>
     );
 }
