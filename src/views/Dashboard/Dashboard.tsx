@@ -1,12 +1,14 @@
-import ProjectsList from "./ProjectList";
+import ProjectsList from "./projects/ProjectList";
 import UsersList from "./UsersList";
+import WorkZonesList from "./workZone/WorkZoneList";
 
-const  Dashboard = () => {
+const Dashboard = () => {
     return (
         <>
-        <h1>Dashboard</h1>
-        <UsersList />
-        <ProjectsList />
+            <h1>Dashboard</h1>
+            <UsersList />
+            <ProjectsList />
+            <WorkZonesList />
         </>
     );
 }
