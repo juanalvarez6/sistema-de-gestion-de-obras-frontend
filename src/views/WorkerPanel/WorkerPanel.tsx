@@ -49,7 +49,10 @@ const WorkerPanel = () => {
             >
               ✖
             </button>
-            <AttendanceForm />
+            <AttendanceForm onSubmit={(data) => {
+  console.log("Asistencia registrada:", data);
+}} />
+
           </div>
         </div>
       )}
