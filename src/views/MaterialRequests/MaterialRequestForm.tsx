@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
+import { useMaterialRequests } from '../../context/MaterialRequestsContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const MaterialRequests = () => {
-  const [material, setMaterial] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [unit, setUnit] = useState('kg');
-  const [preferredOption, setPreferredOption] = useState('');
-  const [comments, setComments] = useState('');
-  const [deliveryDate, setDeliveryDate] = useState('');
-  const [requests, setRequests] = useState<any[]>([]);
+const MaterialRequestForm = () => {
+  const { requests, addRequest, updateRequest, deleteRequest } = useMaterialRequests();
+  const [formData, setFormData] = useState({
+    material: '',
+    quantity: '',
+    unit: 'kg',
+    preferredOption: '',
+    comments: '',
+    deliveryDate: '',
+  });
   const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState<{ material?: string; quantity?: string }>({});
 
   const validateForm = () => {
     let newErrors: { material?: string; quantity?: string } = {};
-    if (!material) newErrors.material = 'Debe seleccionar un material.';
-    if (!quantity || parseFloat(quantity) <= 0) newErrors.quantity = 'La cantidad debe ser mayor a 0.';
+    if (!formData.material) newErrors.material = 'Material requerido';
+    if (!formData.quantity || parseFloat(formData.quantity) <= 0) newErrors.quantity = 'Cantidad inválida';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -22,271 +26,351 @@ const MaterialRequests = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const newRequest = {
-        material,
-        quantity,
-        unit,
-        preferredOption,
-        comments,
-        deliveryDate,
-        status: 'Pendiente',
-      };
-      setRequests([...requests, newRequest]);
+      addRequest({ ...formData, status: 'Pendiente' });
       alert('Solicitud enviada con éxito ✅');
-
-      // Limpiar formulario
-      setMaterial('');
-      setQuantity('');
-      setUnit('kg');
-      setPreferredOption('');
-      setComments('');
-      setDeliveryDate('');
+      setFormData({
+        material: '',
+        quantity: '',
+        unit: 'kg',
+        preferredOption: '',
+        comments: '',
+        deliveryDate: '',
+      });
       setErrors({});
     }
   };
 
-  const updateStatus = (index: number, status: string) => {
-    const updated = [...requests];
-    updated[index].status = status;
-    setRequests(updated);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const updateRequestStatus = (index: number, status: string) => {
+    const updatedRequest = { ...requests[index], status };
+    updateRequest(index, updatedRequest);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header y botón */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-              Gestión de Materiales
-            </span>
-          </h1>
-          <button
-            onClick={() => setShowModal(true)}
-            className="relative overflow-hidden group bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 transform flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-            </svg>
-            Ver Solicitudes
-            <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
-          </button>
-        </div>
-
-        {/* Tarjeta del formulario */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800">Solicitud de Materiales</h2>
-              <p className="text-gray-600 mt-2">Complete el formulario para solicitar materiales de construcción</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Sección de Material */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col">
-                  <label htmlFor="material" className="text-sm font-medium text-gray-700 mb-1">Material</label>
-                  <select
-                    id="material"
-                    value={material}
-                    onChange={(e) => setMaterial(e.target.value)}
-                    className={`p-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                      errors.material ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500 hover:border-blue-400'
-                    }`}
-                  >
-                    <option value="">Seleccione material</option>
-                    <option value="cemento">Cemento</option>
-                    <option value="ladrillos">Ladrillos</option>
-                    <option value="acero">Acero</option>
-                    <option value="madera">Madera</option>
-                    <option value="grava">Grava</option>
-                    <option value="arena">Arena</option>
-                    <option value="yeso">Yeso</option>
-                    <option value="pintura">Pintura</option>
-                    <option value="tubos-pvc">Tubos de PVC</option>
-                    <option value="aislantes">Aislantes</option>
-                  </select>
-                  {errors.material && <p className="text-red-500 text-xs mt-1">{errors.material}</p>}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Layout de dos columnas */}
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Formulario principal */}
+          <div className="flex-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-800">Nueva Solicitud</h2>
+                <p className="text-sm text-gray-500">Complete todos los campos requeridos</p>
+              </div>
+              
+              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                {/* Material */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Material <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="material"
+                      value={formData.material}
+                      onChange={handleChange}
+                      className={`w-full px-3 py-2 border ${errors.material ? 'border-red-400' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    >
+                      <option value="">Seleccione un material...</option>
+                      <option value="Cemento">Cemento</option>
+                      <option value="Ladrillos">Ladrillos</option>
+                      <option value="Acero">Acero</option>
+                      <option value="Madera">Madera</option>
+                      <option value="Grava">Grava</option>
+                      <option value="Arena">Arena</option>
+                      <option value="Yeso">Yeso</option>
+                      <option value="Pintura">Pintura</option>
+                      <option value="Tubos PVC">Tubos PVC</option>
+                    </select>
+                    {errors.material && (
+                      <p className="mt-1 text-sm text-red-600">{errors.material}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Cantidad y Unidad */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <label htmlFor="quantity" className="text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cantidad <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="number"
-                      id="quantity"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      className={`p-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                        errors.quantity ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500 hover:border-blue-400'
-                      }`}
-                      min="1"
+                      name="quantity"
+                      value={formData.quantity}
+                      onChange={handleChange}
+                      className={`w-full px-3 py-2 border ${errors.quantity ? 'border-red-400' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                      placeholder="0.00"
                     />
-                    {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+                    {errors.quantity && (
+                      <p className="mt-1 text-sm text-red-600">{errors.quantity}</p>
+                    )}
                   </div>
-                  <div className="flex flex-col">
-                    <label htmlFor="unit" className="text-sm font-medium text-gray-700 mb-1">Unidad</label>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
                     <select
-                      id="unit"
-                      value={unit}
-                      onChange={(e) => setUnit(e.target.value)}
-                      className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
+                      name="unit"
+                      value={formData.unit}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="kg">Kilogramos</option>
                       <option value="lb">Libras</option>
-                      <option value="m3">Metros cúbicos</option>
+                      <option value="m3">m³</option>
                       <option value="unidad">Unidad</option>
                     </select>
                   </div>
                 </div>
-              </div>
 
-              {/* Opción preferida */}
-              <div className="flex flex-col">
-                <label htmlFor="preferredOption" className="text-sm font-medium text-gray-700 mb-1">Calidad preferida</label>
-                <select
-                  id="preferredOption"
-                  value={preferredOption}
-                  onChange={(e) => setPreferredOption(e.target.value)}
-                  className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                >
-                  <option value="">Seleccione opción</option>
-                  <option value="alta">Alta (Materiales premium)</option>
-                  <option value="media">Media (Calidad estándar)</option>
-                  <option value="baja">Baja (Económico)</option>
-                </select>
-              </div>
+                {/* Calidad y Fecha */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Calidad</label>
+                    <select
+                      name="preferredOption"
+                      value={formData.preferredOption}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Seleccione calidad...</option>
+                      <option value="alta">Alta</option>
+                      <option value="media">Media</option>
+                      <option value="baja">Baja</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de entrega</label>
+                    <input
+                      type="date"
+                      name="deliveryDate"
+                      value={formData.deliveryDate}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
 
-              {/* Comentarios */}
-              <div className="flex flex-col">
-                <label htmlFor="comments" className="text-sm font-medium text-gray-700 mb-1">Comentarios</label>
-                <textarea
-                  id="comments"
-                  rows={3}
-                  value={comments}
-                  onChange={(e) => setComments(e.target.value)}
-                  className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                  placeholder="Detalles adicionales sobre la solicitud..."
-                />
-              </div>
+                {/* Comentarios */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
+                  <textarea
+                    name="comments"
+                    rows={3}
+                    value={formData.comments}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Detalles adicionales..."
+                  />
+                </div>
 
-              {/* Fecha de entrega */}
-              <div className="flex flex-col">
-                <label htmlFor="deliveryDate" className="text-sm font-medium text-gray-700 mb-1">Fecha estimada de entrega</label>
-                <input
-                  type="date"
-                  id="deliveryDate"
-                  value={deliveryDate}
-                  onChange={(e) => setDeliveryDate(e.target.value)}
-                  className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-all"
-                />
-              </div>
-
-              {/* Botón de Enviar */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full relative overflow-hidden group bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-medium py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
-                    </svg>
+                {/* Botones */}
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(true)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Ver solicitudes
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
                     Enviar Solicitud
-                  </span>
-                  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
-                </button>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Panel de información */}
+          <div className="md:w-80 flex-shrink-0">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Instrucciones</h3>
+              <ul className="space-y-3 text-sm text-gray-600">
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Seleccione el material requerido</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Especifique cantidad y unidad de medida</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Indique calidad preferida si aplica</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Agregue fecha de entrega estimada</span>
+                </li>
+              </ul>
+              
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-800 mb-2">Solicitudes recientes</h4>
+                <p className="text-xs text-blue-600">
+                  Tienes {requests.length} solicitudes {requests.length > 0 ? `(${requests.filter(r => r.status === 'Pendiente').length} pendientes)` : ''}
+                </p>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 backdrop-blur-sm">
-          <div className="bg-white w-11/12 max-w-6xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Header del modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Historial de Solicitudes</h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-white hover:text-gray-200 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Contenido del modal */}
-            <div className="overflow-auto p-6">
-              <div className="rounded-xl border border-gray-200 overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidad</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calidad</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {requests.map((req, index) => (
-                      <tr key={index} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{req.material}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.quantity}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{req.unit}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{req.preferredOption}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                            req.status === 'Aprobado' ? 'bg-green-100 text-green-800' :
-                            req.status === 'Rechazado' ? 'bg-red-100 text-red-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {req.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
+      {/* Modal - Versión original */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden border border-gray-100"
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">Historial de Solicitudes</h3>
+                  <button 
+                    onClick={() => setShowModal(false)}
+                    className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
+                  {requests.length === 0 ? (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-8"
+                    >
+                      <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="mt-4 text-gray-500">No hay solicitudes registradas</p>
+                    </motion.div>
+                  ) : (
+                    requests.map((req, index) => (
+                      <motion.div 
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border border-gray-100 rounded-lg p-4 hover:shadow-sm transition-shadow duration-200"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-medium text-gray-800">{req.material}</span>
+                            <span className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                              req.status === 'Pendiente' ? 'bg-yellow-100 text-yellow-800' : 
+                              req.status === 'Aprobado' ? 'bg-green-100 text-green-800' : 
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {req.status}
+                            </span>
+                          </div>
                           <button
-                            onClick={() => updateStatus(index, 'Aprobado')}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            onClick={() => deleteRequest(index)}
+                            className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                            </svg>
+                            {req.quantity} {req.unit}
+                          </div>
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            {req.preferredOption || 'No especificada'}
+                          </div>
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {req.deliveryDate || 'No especificada'}
+                          </div>
+                        </div>
+                        
+                        {req.comments && (
+                          <div className="mt-2 text-sm text-gray-600 flex">
+                            <svg className="w-4 h-4 mr-1 mt-0.5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                            <span className="italic">{req.comments}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2 mt-3">
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => updateRequestStatus(index, 'Aprobado')}
+                            className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
                           >
                             Aprobar
-                          </button>
-                          <button
-                            onClick={() => updateStatus(index, 'Rechazado')}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => updateRequestStatus(index, 'Rechazado')}
+                            className="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
                           >
                             Rechazar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {requests.length === 0 && (
-                <div className="text-center py-12">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No hay solicitudes</h3>
-                  <p className="mt-1 text-sm text-gray-500">No se han registrado solicitudes de materiales aún.</p>
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => updateRequestStatus(index, 'Pendiente')}
+                            className="text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition-colors duration-200"
+                          >
+                            Pendiente
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-export default MaterialRequests;
+export default MaterialRequestForm;

@@ -11,7 +11,7 @@ export const fetchProjects = async (): Promise<Project[]> => {
         throw new Error("Error al obtener los proyectos");
     }
 };
-
+  
 export const fetchProjectById = async (id: number): Promise<Project> => {
     try {
         const response = await axios.get<Project>(`${API_URL}/${id}`);

@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import TaskList from '../../components/TaskList';
 import Task from "../../models/Task";
 import AttendanceForm from "./AttendanceForm";
+import { useMaterialRequests } from '../../context/MaterialRequestsContext'; // Importar el contexto
 
 const WorkerPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const { requests } = useMaterialRequests(); // Obtener las solicitudes del contexto
+
   const tasks: Task[] = [
     {
       id: 1,
@@ -30,12 +32,6 @@ const WorkerPanel = () => {
     },
   ];
 
-  // Lista de materiales solicitados con su estado
-  const materialRequests = [
-    { material: "Madera", quantity: 5, status: "Aprobado" },
-    { material: "Cemento", quantity: 3, status: "Pendiente" },
-  ];
-
   return (
     <div className="bg-gray-100">
       <h1>Dashboard Worker</h1>
@@ -50,9 +46,8 @@ const WorkerPanel = () => {
               ✖
             </button>
             <AttendanceForm onSubmit={(data) => {
-  console.log("Asistencia registrada:", data);
-}} />
-
+              console.log("Asistencia registrada:", data);
+            }} />
           </div>
         </div>
       )}
@@ -73,22 +68,26 @@ const WorkerPanel = () => {
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-2">Materiales Solicitados</h2>
           {/* Mostrar materiales con estado */}
-          {materialRequests.map((request, index) => (
-            <div key={index} className="bg-gray-200 p-4 rounded-lg mb-2">
-              <p className="font-semibold">{request.material} - {request.quantity} unidades</p>
-              <p className="text-sm text-gray-600">
-                Estado: 
-                {/* Cambiar icono según el estado */}
-                {request.status === "Aprobado" ? (
-                  <span className="text-green-500">🟢 Aprobado</span>
-                ) : request.status === "Pendiente" ? (
-                  <span className="text-yellow-500">⏳ Pendiente</span>
-                ) : (
-                  <span className="text-red-500">🔴 Rechazado</span>
-                )}
-              </p>
-            </div>
-          ))}
+          {requests.length === 0 ? (
+            <p className="text-gray-600">No hay solicitudes de materiales registradas.</p>
+          ) : (
+            requests.map((request, index) => (
+              <div key={index} className="bg-gray-200 p-4 rounded-lg mb-2">
+                <p className="font-semibold">{request.material} - {request.quantity} {request.unit}</p>
+                <p className="text-sm text-gray-600">
+                  Estado: 
+                  {/* Cambiar icono según el estado */}
+                  {request.status === "Aprobado" ? (
+                    <span className="text-green-500">🟢 Aprobado</span>
+                  ) : request.status === "Pendiente" ? (
+                    <span className="text-yellow-500">⏳ Pendiente</span>
+                  ) : (
+                    <span className="text-red-500">🔴 Rechazado</span>
+                  )}
+                </p>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="mb-6">
