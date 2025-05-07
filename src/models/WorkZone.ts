@@ -11,7 +11,7 @@ export interface WorkZone {
 }
 
 export interface CreateWorkZone {
-    project: {id: number};
+    projectId: number;
     name: string;
     description: string;
     latitude: number | string;
