@@ -1,5 +1,22 @@
 import { useState, useEffect } from "react";
-import Task from '../models/Task';
+
+interface Task {
+  id: number;
+  zone: {
+    id: number;
+    name: string;
+    locationName: string;
+  };
+  user: {
+    id: number;
+    name: string;
+  };
+  description: string;
+  status: "pendiente" | "en curso" | "completada";
+  assignmentDate: Date;
+  completionDate: Date;
+  priority: "alta" | "media" | "baja";
+}
 
 const taskStatusOptions = {
   pendiente: { text: "🔵 Pendiente", color: "text-blue-600" },

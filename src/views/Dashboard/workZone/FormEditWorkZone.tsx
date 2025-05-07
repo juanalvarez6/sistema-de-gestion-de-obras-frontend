@@ -14,7 +14,7 @@ const FormEditWorkZone = ({ workZone }: FormEditWorkZoneProps) => {
     const { data: projects, isLoading } = useProjects();
 
     const [newWorkZone, setNewWorkZone] = useState<CreateWorkZone>({
-        project: { id: workZone.project.id },
+        projectId: workZone.project.id,
         name: workZone.name,
         description: workZone.description,
         latitude: workZone.latitude.toString(),
@@ -32,7 +32,7 @@ const FormEditWorkZone = ({ workZone }: FormEditWorkZoneProps) => {
             return;
         }
 
-        if (newWorkZone.project.id === -1) {
+        if (newWorkZone.projectId === -1) {
             alert("Por favor, selecciona un proyecto.");
             return;
         }
@@ -45,7 +45,7 @@ const FormEditWorkZone = ({ workZone }: FormEditWorkZoneProps) => {
 
         updateWorkZoneMutation({ id: workZone.id, data: formattedWorkZone });
         setNewWorkZone({
-            project: { id: workZone.project.id },
+            projectId: workZone.project.id,
             name: workZone.name,
             description: workZone.description,
             latitude: workZone.latitude.toString(),
@@ -86,11 +86,11 @@ const FormEditWorkZone = ({ workZone }: FormEditWorkZoneProps) => {
                             ) : (
                                 <select name="project"
                                     className="w-full px-3 py-2 border rounded-md mb-2"
-                                    value={newWorkZone.project.id}
+                                    value={newWorkZone.projectId}
                                     onChange={(e) =>
                                         setNewWorkZone({
                                             ...newWorkZone,
-                                            project: { id: Number(e.target.value) },
+                                            projectId: Number(e.target.value),
                                         })
                                     }
                                 >
