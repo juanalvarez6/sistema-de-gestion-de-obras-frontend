@@ -7,6 +7,8 @@ export const useProjects = () => {
   return useQuery<Project[], Error>({
     queryKey: ["projects"],
     queryFn: () => projectService.fetchAll(),
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -57,6 +59,20 @@ export const useDeleteProject = () => {
     },
     onError: (error) => {
       console.error("Error al eliminar el proyecto:", error.message);
+    },
+  });
+};
+
+// Actualizar el estado de un proyecto
+export const useUpdateProjectStatus = (): UseMutationResult<void, Error, { id: number; status: string }> => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { id: number; status: string }>({
+    mutationFn: ({ id, status }) => projectService.updateProjectStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+    onError: (error) => {
+      console.error("Error al actualizar el estado del proyecto:", error.message);
     },
   });
 };

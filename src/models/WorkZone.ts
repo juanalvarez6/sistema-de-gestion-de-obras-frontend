@@ -16,5 +16,4 @@ export interface CreateWorkZone {
     description: string;
     latitude: number | string;
     longitude: number | string;
-    status: 'EN_PROGRESO' | 'FINALIZADA';
 }

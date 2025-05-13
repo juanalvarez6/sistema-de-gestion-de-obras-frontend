@@ -7,7 +7,15 @@ import { MaterialRequestsProvider } from './context/MaterialRequestsContext'; //
 import './index.css'
 import AppRoutes from './routes/AppRoutes.tsx';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
