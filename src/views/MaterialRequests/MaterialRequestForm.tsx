@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useMaterialRequests } from '../../context/MaterialRequestsContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,10 +41,33 @@ const MaterialRequestForm = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+
+  // Mapeo de materiales con su unidad predeterminada
+  const unitByMaterial: { [key: string]: string } = {
+    Cemento: 'kg',
+    Ladrillos: 'unidad',
+    Acero: 'kg',
+    Madera: 'm3',
+    Grava: 'kg',
+    Arena: 'kg',
+    Yeso: 'kg',
+    Pintura: 'litros',
+    'Tubos PVC': 'unidad',
   };
+
+  if (name === 'material') {
+    setFormData(prev => ({
+      ...prev,
+      material: value,
+      unit: unitByMaterial[value] || prev.unit, // cambia la unidad si existe en el mapa
+    }));
+  } else {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+};
+
 
   const updateRequestStatus = (index: number, status: string) => {
     const updatedRequest = { ...requests[index], status };
@@ -119,6 +143,7 @@ const MaterialRequestForm = () => {
                       value={formData.unit}
                       onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled
                     >
                       <option value="kg">Kilogramos</option>
                       <option value="lb">Libras</option>
@@ -146,7 +171,7 @@ const MaterialRequestForm = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de entrega</label>
+                    <label className="block text-sm font-medium text-gray-7 00 mb-1">Fecha de entrega</label>
                     <input
                       type="date"
                       name="deliveryDate"
