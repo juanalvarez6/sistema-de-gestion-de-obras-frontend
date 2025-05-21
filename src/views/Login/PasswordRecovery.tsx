@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_USERS_URL;
 
 
 export default function PasswordRecovery() {
@@ -16,7 +16,7 @@ export default function PasswordRecovery() {
       const response = await fetch(`${API_URL}/auth/send-reset-code?email=` + email, {
         method: "POST",
       });
-  
+
       if (response.ok) {
         alert("Código enviado a tu correo");
         setStep(2);
@@ -35,17 +35,17 @@ export default function PasswordRecovery() {
       const bodyData = JSON.stringify({
         email,
         verificationCode,
-        newPassword, 
+        newPassword,
       });
 
-  
+
       const resetResponse = await fetch(`${API_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: bodyData,
       });
-  
-      
+
+
       if (resetResponse.ok) {
         alert("Contraseña restablecida con éxito");
         setStep(1);
@@ -57,8 +57,6 @@ export default function PasswordRecovery() {
       alert("Hubo un problema");
     }
   };
-  
-
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -124,7 +122,7 @@ export default function PasswordRecovery() {
         )}
 
         <div className="text-center mt-4">
-          <a href="/login" className="text-pink-500 font-semibold">
+          <a href="/" className="text-pink-500 font-semibold">
             Back to Login
           </a>
         </div>

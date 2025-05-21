@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthProvider";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_USERS_URL;
 
 const Login = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -15,26 +17,27 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 401) {
-          throw new Error("Incorrect password. Please try again.");
-        } else if (response.status === 404) {
-          throw new Error("Email not found. Please register first.");
-        } else {
-          throw new Error("Login failed. Please check your credentials.");
-        }
-      }
+      const data = await res.json();
+      const token = data.token;
 
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      navigate("/register");
+      const userRes = await fetch(`${API_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const user = await userRes.json();
+
+      login(token, user);
+
+      if (user.role === "ADMINISTRADOR") navigate("/admin");
+      else if (user.role === "SUPERVISOR") navigate("/supervisor");
+      else if (user.role === "OPERADOR") navigate("/operator");
+
     } catch (err) {
       setError((err as Error).message);
     }
@@ -96,17 +99,10 @@ const Login = () => {
           </form>
 
           <div className="text-center mt-3">
-          <p className="text-gray-500 mt-3">Forgot password?</p>
-          <a href="/password-recovery" className="text-pink-500 font-semibold">Reset it</a>
-        </div>
-
-
-          <div className="text-center mt-4">
-            <p className="text-gray-600">Don’t have an account?</p>
-            <button onClick={() => navigate("/register")} className="border border-red-500 text-red-500 px-4 py-2 rounded-lg mt-2 hover:bg-red-500 hover:text-white transition">
-              REGISTER
-            </button>
+            <p className="text-gray-500 mt-3">Forgot password?</p>
+            <a href="/password-recovery" className="text-pink-500 font-semibold">Reset it</a>
           </div>
+
         </div>
 
         {/* Sección derecha - Texto con gradiente */}

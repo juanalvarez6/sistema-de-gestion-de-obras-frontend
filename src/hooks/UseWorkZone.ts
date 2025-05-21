@@ -60,3 +60,21 @@ export const useDeleteWorkZone = () => {
     },
   });
 };
+
+export const useUpdateWorkZoneStatus = (): UseMutationResult<
+  void,
+  Error,
+  { id: number; status: string }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { id: number; status: string }>({
+    mutationFn: ({ id, status }) => workZoneService.updateWorkZoneStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workZones'] });
+    },
+    onError: (error) => {
+      console.error('Error al actualizar el estado de WorkZone:', error.message);
+    },
+  });
+};

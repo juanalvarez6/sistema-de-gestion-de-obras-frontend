@@ -8,10 +8,14 @@ import {
 } from "react-leaflet";
 import { useEffect, useState } from "react";
 import L from "leaflet";
+import { MessageModal, MessageType } from "./MessageModal";
+import 'leaflet/dist/leaflet.css';
+import { X } from "lucide-react";
 
 interface Props {
-    onSelect: (lat: number, lng: number) => void;
+    onSelect: (lat: number, lng: number, locationRange: number) => void;
     initialCoords?: [number, number];
+    locationRange?: number;
 }
 
 const defaultCenter: [number, number] = [4.8143, -75.6946]; // Colombia
@@ -60,35 +64,39 @@ function MapController({ center }: { center: [number, number] }) {
     return null;
 }
 
-export default function MapModal({ onSelect, initialCoords }: Props) {
+export default function MapModal({ onSelect, initialCoords, locationRange }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(null);
     const [center, setCenter] = useState<[number, number]>(defaultCenter);
     const [radius, setRadius] = useState<number>(100);
 
     const openModal = () => {
-        if (initialCoords) {
+        if (initialCoords && locationRange) {
             setSelectedCoords(initialCoords);
+            setRadius(locationRange);
             setCenter(initialCoords);
         }
         setIsOpen(true)
     };
     const closeModal = () => setIsOpen(false);
 
+    const [notification, setNotification] = useState<{ message: string, type: MessageType } | null>(null);
     const locateUser = () => {
         if (!navigator.geolocation) {
-            alert("Geolocalización no soportada");
+            setNotification({ message: "Geolocalización no soportada", type: "error" })
             return;
         }
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const { latitude, longitude } = pos.coords;
-                setCenter([latitude, longitude]);
+                const coords: [number, number] = [latitude, longitude];
+                setCenter(coords);
+                setSelectedCoords(coords);
             },
             (err) => {
+                setNotification({ message: "No se pudo obtener la ubicación actual.", type: "error" })
                 console.error("Error al obtener ubicación:", err);
-                alert("No se pudo obtener la ubicación actual.");
             },
             {
                 enableHighAccuracy: true,
@@ -111,7 +119,7 @@ export default function MapModal({ onSelect, initialCoords }: Props) {
 
             {/* Modal */}
             {isOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+                <div className="fixed inset-0 bg-gradient-to-tr from-gray-900 to-gray-300 bg-opacity-40 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg p-4 shadow-xl w-full max-w-3xl h-[90vh] flex flex-col">
                         {/* Encabezado */}
                         <div className="flex justify-between items-center mb-2">
@@ -120,7 +128,7 @@ export default function MapModal({ onSelect, initialCoords }: Props) {
                                 className="text-red-500 font-semibold"
                                 onClick={closeModal}
                             >
-                                ✖ Cerrar
+                                <X className="text-black"/>
                             </button>
                         </div>
 
@@ -130,7 +138,7 @@ export default function MapModal({ onSelect, initialCoords }: Props) {
                                 onClick={locateUser}
                                 className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
                             >
-                                Mi ubicación
+                                Ubicación actual
                             </button>
                             <select
                                 onChange={(e) => {
@@ -198,7 +206,7 @@ export default function MapModal({ onSelect, initialCoords }: Props) {
                                 disabled={!selectedCoords}
                                 onClick={() => {
                                     if (selectedCoords) {
-                                        onSelect(selectedCoords[0], selectedCoords[1]);
+                                        onSelect(selectedCoords[0], selectedCoords[1], radius);
                                         closeModal();
                                     }
                                 }}
@@ -210,10 +218,18 @@ export default function MapModal({ onSelect, initialCoords }: Props) {
                                 Confirmar
                             </button>
                         </div>
-
                     </div>
                 </div>
             )}
+
+            {notification && (
+                <MessageModal
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(null)}
+                />
+            )}
+
         </>
     );
 }

@@ -6,6 +6,7 @@ export interface Project {
     description: string;
     latitude: number | string;
     longitude: number | string;
+    locationRange: number;
     startDate: string;
     endDate: string;
     status: statusProject;
@@ -17,6 +18,8 @@ export interface CreateProject {
     description: string;
     latitude: number | string;
     longitude: number | string;
+    locationRange: number;
     startDate: string;
     endDate: string;
+    userId: string;
 }

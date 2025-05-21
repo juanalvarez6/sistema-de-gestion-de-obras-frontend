@@ -8,6 +8,7 @@ import Reports from '../views/Reports/Reports';
 import Register from '../views/Login/register/Register';
 import App from '../App';
 import AdminView from '../views/admin/AdminView';
+import SupervisorView from '../views/supervisor/SupervisorView';
 
 
 
@@ -18,6 +19,7 @@ const AppRoutes = () => {
                 <Route path='/login' element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/dashboard" element={<AdminView />} />
+                <Route path="/supervisor" element={<SupervisorView />} />
                 <Route path="/worker-panel" element={<WorkerPanel />} />
                 <Route path="/material-requests" element={<MaterialRequests />} />
                 <Route path="/task-management" element={<TaskManagement />} />
