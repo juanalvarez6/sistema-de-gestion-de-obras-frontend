@@ -9,6 +9,8 @@ import { NoResults } from "../../../components/NoResults";
 import { GenericPagination } from "../../../components/GenericPagination";
 import UserCard from "../../../components/UserCard";
 import { MessageModal, MessageType } from "../../../components/MessageModal";
+import { GenericModalForm } from "../../../components/FormCommon";
+import RegisterForm from "../../Login/register/RegisterForm";
 
 const UsersView = () => {
 
@@ -19,6 +21,7 @@ const UsersView = () => {
   const [filter, setFilter] = useState<"todos" | "administrador" | "supervisor" | "operador">("todos");
   const [searchedUsers, setSearchedUsers] = useState<UserResponseDto[]>([]);
   const [notification, setNotification] = useState<{ message: string, type: MessageType } | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const filteredUsers = users.filter((user) => {
     if (filter === "todos") return true;
@@ -50,13 +53,23 @@ const UsersView = () => {
 
         <div className="my-4 sm:my-0 mx-auto md:m-0">
           {/* Botón para Nuevo Usuario */}
-          <a
-            href="/register"
+          <button
+            onClick={() => setShowRegisterModal(true)}
             className="mx-auto md:m-0 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
           >
             <Plus />
             Nuevo Usuario
-          </a>
+          </button>
+
+          {showRegisterModal && (
+            <GenericModalForm
+              title="Registrar Nuevo Usuario"
+              headerColor="from-orange-500 to-pink-500"
+              onClose={() => setShowRegisterModal(false)}
+            >
+              <RegisterForm onClose={() => setShowRegisterModal(false)} />
+            </GenericModalForm>
+          )}
         </div>
       </div>
 
@@ -74,9 +87,9 @@ const UsersView = () => {
                 onFilterChange={setFilter}
                 filters={[
                   { value: "todos", label: "Todos", color: "bg-blue-600" },
-                  { value: "administrador", label: "Administradores", color: "bg-purple-600" },
-                  { value: "supervisor", label: "Supervisores", color: "bg-green-600" },
-                  { value: "operador", label: "Operadores", color: "bg-yellow-500" },
+                  { value: "administrador", label: "Administrador", color: "bg-purple-600" },
+                  { value: "supervisor", label: "Supervisor", color: "bg-green-600" },
+                  { value: "operador", label: "Operador", color: "bg-yellow-500" },
                 ]}
               />
             </div>

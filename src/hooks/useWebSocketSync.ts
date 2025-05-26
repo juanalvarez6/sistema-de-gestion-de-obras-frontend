@@ -1,15 +1,18 @@
 import { useEffect } from "react";
 import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../context/AuthProvider";
 
 export const useProjectSync = () => {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
 
   useEffect(() => {
-    const socket = new SockJS(`${import.meta.env.VITE_API_GESTION}/ws`);
     const stompClient = new Client({
-      webSocketFactory: () => socket,
+      brokerURL: `${import.meta.env.VITE_API_GESTION}/ws`,
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
       reconnectDelay: 5000,
       onConnect: () => {
         stompClient.subscribe("/topic/projects", (message) => {
@@ -30,12 +33,15 @@ export const useProjectSync = () => {
 
 export const useWorkZoneSync = () => {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
 
   useEffect(() => {
     // Configuración del cliente STOMP
-    const socket = new SockJS(`${import.meta.env.VITE_API_GESTION}/ws`);
     const stompClient = new Client({
-      webSocketFactory: () => socket,
+      brokerURL: `${import.meta.env.VITE_API_GESTION}/ws`,
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
       reconnectDelay: 5000, // Reintenta conexión cada 5 segundos si falla
       debug: (str) => console.debug('[STOMP]', str), // Opcional: logs para depuración
 

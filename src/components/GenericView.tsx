@@ -1,89 +1,177 @@
 import { ReactNode, useEffect, useState } from "react";
+import { Menu, CircleUserRound, X } from "lucide-react";
+import { useAuth } from "../context/AuthProvider";
+import LogoutButton from "./LogoutButton";
 
-type Option = {
+interface Option {
   id: number;
   label: string;
+  icon: ReactNode;
   content: ReactNode | string;
-};
+}
 
 type GenericViewProps = {
-  title: string;
   options: Option[];
   localStorageKey?: string;
 };
 
 export const GenericView = ({
-  title,
   options,
-  localStorageKey = 'genericViewSelectedOption',
+  localStorageKey = "genericViewSelectedOption",
 }: GenericViewProps) => {
   const [selected, setSelected] = useState<Option>(() => {
     const savedOption = localStorage.getItem(localStorageKey);
     return savedOption
-      ? options.find(opt => opt.id === JSON.parse(savedOption).id) || options[0]
+      ? options.find((opt) => opt.id === JSON.parse(savedOption).id) || options[0]
       : options[0];
   });
+
+  const { user } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(localStorageKey, JSON.stringify({
-      id: selected.id,
-      label: selected.label
-    }));
+    localStorage.setItem(
+      localStorageKey,
+      JSON.stringify({ id: selected.id, label: selected.label })
+    );
   }, [selected, localStorageKey]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-full flex justify-between items-center md:justify-center mb-4 md:mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
+    <div className="min-h-screen flex bg-gradient-to-b from-blue-100 to-white">
+      {/* Sidebar */}
+      <div className="md:relative">
+        {/* Menú lateral escritorio */}
+        <div className="bg-white hidden md:flex flex-col items-start border-r border-blue-200 w-14 hover:w-64 transition-all duration-300 fixed h-full z-30 overflow-hidden group">
 
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-blue-600 hover:bg-blue-100 focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
+          {/* Sección de Usuario - Estilo consistente con móvil */}
+          <div className="flex flex-col items-center gap-2 px-4 py-6 w-full">
+            {/* Icono de usuario - Tamaño grande fijo */}
+            <CircleUserRound className="group-hover:h-10 group-hover:w-10 transition-all duration-300" />
 
-          <div className={`${isMenuOpen ? 'block' : 'hidden'} md:block w-full text-center`}>
-            <div className="inline-flex flex-wrap justify-center gap-4">
-              {options.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    setSelected(option);
-                    setIsMenuOpen(false);
-                  }}
-                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow
-                    ${selected.id === option.id
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "bg-white text-blue-600 border border-blue-300 hover:bg-blue-50"
-                    }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+            {/* Nombre y email - Solo visible al expandir */}
+            <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <p className="font-semibold text-sm">
+                {user?.fullName || "Usuario"}
+              </p>
+              {user?.email && (
+                <p className="text-sm text-gray-500 mt-1 truncate max-w-[180px]">
+                  {user.email}
+                </p>
+              )}
+              <LogoutButton/>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 mx-auto max-w-xl md:max-w-6xl text-center">
-          <div className="text-gray-600 text-lg">
-            {typeof selected.content === 'string' ? (
-              <p>{selected.content}</p>
-            ) : (
-              selected.content
-            )}
+          {/* Opciones del menú */}
+          {options.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => setSelected(option)}
+              className={`flex items-center gap-3 w-full px-4 py-3 text-left transition-colors ${selected.id === option.id
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-700 hover:bg-gray-100'
+                }`}
+            >
+              {/* Icono */}
+              <div className="min-w-[24px] ">{option.icon}</div>
+
+              <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {option.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+
+      {/* Contenido principal */}
+      <div className="flex-1 ml-0 md:ml-16 p-4 md:p-5 transition-all">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center">
+            {/* MÓVIL - Menú Lateral */}
+            <div className="md:hidden">
+              {/* Botón de hamburguesa */}
+              <div className="flex items-center justify-between px-4 py-4">
+                <button
+                  onClick={() => setIsMenuOpen((prev) => !prev)}
+                  className="p-2 rounded bg-white shadow-lg z-50"
+                >
+                  <Menu className="text-blue-600 h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Overlay y Menú Lateral */}
+              {isMenuOpen && (
+                <>
+                  {/* Overlay oscuro */}
+                  <div
+                    className="fixed inset-0 bg-opacity-50 z-40"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+
+                  {/* Menú Lateral */}
+                  <div className="fixed inset-y-0 left-0 bg-white shadow-xl z-50 w-64 transform transition-transform duration-300 ease-in-out">
+                    <div className="flex flex-col h-full pt-4 pb-6">
+                      {/* Botón de cerrar */}
+                      <div className="flex justify-end px-4">
+                        <button
+                          onClick={() => setIsMenuOpen(false)}
+                          className="p-2 rounded-full hover:bg-gray-100"
+                        >
+                          <X className="text-gray-500 h-5 w-5" />
+                        </button>
+                      </div>
+
+                      {/* Sección de Usuario */}
+                      <div className="flex flex-col items-center gap-2 px-4 py-6">
+                        <CircleUserRound className="h-10 w-10" />
+                        <span className="text-center font-semibold">
+                          {user?.fullName || "Usuario"}
+                        </span>
+                        {user?.email && (
+                          <span className="text-sm text-gray-500">
+                            {user.email}
+                          </span>
+                        )}
+                        <LogoutButton/>
+                      </div>
+
+                      <div className="w-full h-1 border-t border-blue-200"></div>
+
+                      {/* Opciones del menú */}
+                      <div className="flex-1 overflow-y-auto">
+                        {options.map((option) => (
+                          <button
+                            key={option.id}
+                            onClick={() => {
+                              setSelected(option);
+                              setIsMenuOpen(false);
+                            }}
+                            className={`flex items-center gap-3 w-full px-4 py-3 text-left transition-colors ${selected.id === option.id
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-700 hover:bg-gray-100'
+                              }`}
+                          >
+                            <span>{option.icon}</span>
+                            <span className="font-medium">{option.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            <h1 className="text-2xl md:mb-4 md:text-3xl font-bold text-gray-800 text-center md:text-left">
+              SISTEMA DE GESTIÓN
+            </h1>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center md:text-left">
+            <div className="text-gray-600 text-lg">
+              {typeof selected.content === "string" ? <p>{selected.content}</p> : selected.content}
+            </div>
           </div>
         </div>
       </div>

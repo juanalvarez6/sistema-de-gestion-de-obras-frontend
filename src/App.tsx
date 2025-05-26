@@ -5,8 +5,6 @@ import Login from "./views/Login/Login";
 import AdminView from "./views/admin/AdminView";
 import SupervisorView from "./views/supervisor/SupervisorView";
 import OperatorView from "./views/operator/OperatorView";
-import LogoutButton from "./components/LogoutButton";
-import Register from "./views/Login/register/Register";
 import PasswordRecovery from "./views/Login/PasswordRecovery";
 
 function App() {
@@ -20,22 +18,10 @@ function App() {
           <Route path="/password-recovery" element={<PasswordRecovery />} />
 
           <Route
-            path="register"
-            element={
-              <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                <Register />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={["ADMINISTRADOR"]}>
-                <>
-                  <AdminView />
-                  <LogoutButton />
-                </>
+                <AdminView />
               </ProtectedRoute>
             }
           />
@@ -44,10 +30,7 @@ function App() {
             path="/supervisor"
             element={
               <ProtectedRoute allowedRoles={["SUPERVISOR"]}>
-                <>
-                  <SupervisorView />
-                  <LogoutButton />
-                </>
+                <SupervisorView />
               </ProtectedRoute>
             }
           />
@@ -56,25 +39,12 @@ function App() {
             path="/operator"
             element={
               <ProtectedRoute allowedRoles={["OPERADOR"]}>
-                <>
-                  <OperatorView />
-                  <LogoutButton />
-                </>
+                <OperatorView />
               </ProtectedRoute>
             }
           />
         </Routes>
       </Router>
-
-      {/*<div className='flex justify-around m-8'>
-          <Link to='/login' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>Login </Link>
-          <Link to='/dashboard' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>Dashboard </Link>
-          <Link to='/supervisor' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>Supervisor View </Link>
-          <Link to='/worker-panel' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>Worker-panel </Link>
-          <Link to='/material-requests' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>MaterialRequests </Link>
-          <Link to='/task-management' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>TaskManagement </Link>
-          <Link to='/reports' className='bg-blue-500 rounded-full p-3 hover:bg-sky-300'>Reports</Link>
-        </div>*/}
     </>
   );
 }

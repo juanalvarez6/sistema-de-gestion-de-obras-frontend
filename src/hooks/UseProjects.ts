@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient, UseMutationResult } from "@tanstack/react-query";
 import { projectService } from "../services/ProjectService";
 import { Project, CreateProject } from "../models/Project";
+import { useAuth } from "../context/AuthProvider";
 
 // Obtener todos los proyectos con manejo de errores
 export const useProjects = () => {
+  const { token } = useAuth();
   return useQuery<Project[], Error>({
     queryKey: ["projects"],
-    queryFn: () => projectService.fetchAll(),
+    queryFn: () => projectService.fetchAll(token!),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
@@ -14,18 +16,20 @@ export const useProjects = () => {
 
 // Obtener un proyecto por ID
 export const useProject = (id: number) => {
+  const { token } = useAuth();
   return useQuery<Project, Error>({
     queryKey: ["project", id],
-    queryFn: () => projectService.fetchById(id),
+    queryFn: () => projectService.fetchById(id, token!),
     enabled: !!id, // Solo ejecutar la consulta si id es verdadero
   });
 };
 
 // Crear un nuevo proyecto con manejo de errores
 export const useCreateProject = (): UseMutationResult<Project, Error, CreateProject> => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<Project, Error, CreateProject>({
-    mutationFn: (data) => projectService.create(data),
+    mutationFn: (data) => projectService.create(data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
@@ -37,9 +41,10 @@ export const useCreateProject = (): UseMutationResult<Project, Error, CreateProj
 
 // Actualizar un proyecto
 export const useUpdateProject = () => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<Project, Error, { id: number; data: Partial<CreateProject> }>({
-    mutationFn: ({ id, data }) => projectService.update(id, data),
+    mutationFn: ({ id, data }) => projectService.update(id, data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
@@ -51,9 +56,10 @@ export const useUpdateProject = () => {
 
 // Eliminar un proyecto
 export const useDeleteProject = () => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<void, Error, number>({
-    mutationFn: (id) => projectService.delete(id),
+    mutationFn: (id) => projectService.delete(id, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
@@ -65,9 +71,10 @@ export const useDeleteProject = () => {
 
 // Actualizar el estado de un proyecto
 export const useUpdateProjectStatus = (): UseMutationResult<void, Error, { id: number; status: string }> => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<void, Error, { id: number; status: string }>({
-    mutationFn: ({ id, status }) => projectService.updateProjectStatus(id, status),
+    mutationFn: ({ id, status }) => projectService.updateProjectStatus(id, status, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },

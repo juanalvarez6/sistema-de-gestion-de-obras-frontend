@@ -7,12 +7,18 @@ class ProjectService extends GenericService<Project, CreateProject> {
         super(`${import.meta.env.VITE_API_GESTION}/projects`);
     }
 
-    async updateProjectStatus(id: number, status: string): Promise<void> {
+    async updateProjectStatus(id: number, status: string, token: string): Promise<void> {
         try {
             await axios.put(`${this.apiUrl}/${id}/status`, null, {
                 params: { status },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 403) {
+                throw new Error("No tienes permisos para actualizar el estado del proyecto");
+            }
             throw new Error(`Error al actualizar el estado del proyecto con ID ${id}`);
         }
     }
