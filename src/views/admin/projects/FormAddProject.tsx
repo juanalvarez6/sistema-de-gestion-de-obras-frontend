@@ -98,7 +98,7 @@ export const FormAddProject = ({ onClose, onMesaje }: FormAddProjectProps) => {
                 />
             </div>
 
-            <div className="space-y-2 m-0">
+            <div className="space-y-2 flex flex-col justify-center items-center">
                 <div>
                     <MapModal onSelect={(lat, lng, locationRange) => {
                         setCoords({ lat, lng });

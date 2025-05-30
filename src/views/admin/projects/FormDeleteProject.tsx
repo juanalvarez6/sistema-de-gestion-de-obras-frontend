@@ -29,7 +29,7 @@ export const FormDeleteProject = ({ projectId, onClose, onMesaje }: FormDeletePr
     };
 
     const children =
-        <div className="p-6 space-y-4">
+        <div className="space-y-4">
             <p className="text-gray-700 text-center text-base">
                 ¿Estás seguro de que deseas eliminar este proyecto? Esta acción no se puede deshacer.
             </p>
