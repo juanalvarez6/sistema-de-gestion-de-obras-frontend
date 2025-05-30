@@ -13,7 +13,7 @@ const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
     const showActions = project.status !== "FINALIZADO";
 
     return (
-        <div className="bg-white rounded-xl shadow-lg border p-6 w-full hover:shadow-xl transition duration-300 relative">
+        <div className="bg-white rounded-xl shadow-lg border p-4 w-full hover:shadow-xl transition duration-300 relative">
             {/* Botones de acción */}
             {showActions && onEdit && onDelete && (
                 <div>
@@ -41,16 +41,20 @@ const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
             )}
 
             {/* Contenido de la tarjeta */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:px-6 sm:items-center gap-2 mb-4">
-                <h2 className="text-2xl font-bold text-gray-800 break-words">
-                    {project.name}
-                </h2>
+            <h2 className="text-2xl font-bold text-gray-800 break-words">
+                {project.name}
+            </h2>
+
+            <div className="flex flex-col md:flex-row items-center md:gap-4 my-2">
+                <p className="text-sm text-gray-600">
+                    <strong>Estado:</strong>
+                </p>
                 <EditProjectStatus project={project} />
             </div>
 
-            <p className="text-gray-600 text-sm mb-4">{project.description}</p>
+            <p className="text-gray-600 text-sm"><strong >Descripción:</strong> {project.description}</p>
 
-            <div className="grid grid-cols-1 gap-1 text-sm text-gray-500 p-2">
+            <div className="grid grid-cols-1 text-sm text-gray-500 p-2">
                 <p className="flex gap-0.5 items-center justify-center">
                     <MapPin /><strong>Ubicación: </strong>
                     <a
@@ -63,11 +67,14 @@ const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
                     </a>
                 </p>
 
-                <div className="flex gap-0.5 items-center justify-center">
-                    <Calendar /><p ><strong>Inicio:</strong> {new Date(project.startDate).toISOString().split("T")[0]}</p>
-                </div>
-                <div className="flex gap-0.5 items-center justify-center">
-                    <CalendarCheck /><p><strong>Fin:</strong> {new Date(project.endDate).toISOString().split("T")[0]}</p>
+                <div className="grid md:grid-cols-2 gap-3">
+                    <div className="flex gap-0.5 items-center justify-center">
+                        <Calendar /><p ><strong>Inicio:</strong> {new Date(project.startDate).toISOString().split("T")[0]}</p>
+                    </div>
+
+                    <div className="flex gap-0.5 items-center justify-center">
+                        <CalendarCheck /><p><strong>Fin:</strong> {new Date(project.endDate).toISOString().split("T")[0]}</p>
+                    </div>
                 </div>
             </div>
         </div>

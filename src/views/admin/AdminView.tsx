@@ -20,7 +20,6 @@ const AdminView = () => {
   return (
     <GenericView
       options={options}
-      localStorageKey="SelectedOptionAdmin"
     />
   );
 };

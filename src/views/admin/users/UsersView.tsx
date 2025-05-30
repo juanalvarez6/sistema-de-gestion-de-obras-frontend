@@ -10,7 +10,7 @@ import { GenericPagination } from "../../../components/GenericPagination";
 import UserCard from "../../../components/UserCard";
 import { MessageModal, MessageType } from "../../../components/MessageModal";
 import { GenericModalForm } from "../../../components/FormCommon";
-import RegisterForm from "../../Login/register/RegisterForm";
+import RegisterForm from "../register/RegisterForm";
 
 const UsersView = () => {
 

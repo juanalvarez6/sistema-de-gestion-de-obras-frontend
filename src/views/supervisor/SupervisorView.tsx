@@ -25,7 +25,6 @@ const SupervisorView = () => {
   return (
     <GenericView
       options={options}
-      localStorageKey="SelectedOptionSupervisor"
     />
   )
 }
