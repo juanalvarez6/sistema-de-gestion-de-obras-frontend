@@ -19,7 +19,7 @@ const ZoneCard = ({ zone, onEdit, onDelete }: Props) => {
                     <div className="absolute bottom-2 left-2">
                         <button
                             onClick={() => onEdit(zone.id)}
-                            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all hover:shadow-xl duration-300 hover:scale-120"
+                            className="p-2 bg-amber-400 text-white rounded-full hover:bg-amber-500 transition-all hover:shadow-xl  duration-300 hover:scale-120"
                             aria-label="Editar zona"
                         >
                             <Pencil className="h-4 w-4" />
