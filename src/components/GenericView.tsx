@@ -29,6 +29,7 @@ export const GenericView = ({
   const { user } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(
@@ -42,16 +43,20 @@ export const GenericView = ({
       {/* Sidebar */}
       <div className="md:relative">
         {/* Menú lateral escritorio */}
-        <div className="bg-white hidden md:flex flex-col items-start border-r border-blue-200 w-14 hover:w-64 transition-all duration-300 fixed h-full z-30 overflow-hidden group">
+        <div
+          className="bg-white hidden md:flex flex-col items-start border-r border-blue-200 w-14 hover:w-64 transition-all duration-300 fixed h-full z-30 overflow-hidden group"
+          onMouseEnter={() => setSidebarExpanded(true)}
+          onMouseLeave={() => setSidebarExpanded(false)}
+        >
 
           {/* Sección de Usuario - Estilo consistente con móvil */}
-          <div className="flex flex-col items-center gap-2 px-4 py-6 w-full">
+          <div className="flex flex-col items-center justify-center gap-2 px-4 py-6 w-full">
             {/* Icono de usuario - Tamaño grande fijo */}
-            <CircleUserRound className="group-hover:h-10 group-hover:w-10 transition-all duration-300" />
+            <CircleUserRound className="group-hover:h-12 group-hover:w-12 transition-all duration-300" />
 
             {/* Nombre y email - Solo visible al expandir */}
-            <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <p className="font-semibold text-sm">
+            <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center gap-1">
+              <p className="font-semibolds text-sm">
                 {user?.fullName || "Usuario"}
               </p>
               {user?.email && (
@@ -59,9 +64,11 @@ export const GenericView = ({
                   {user.email}
                 </p>
               )}
-              <LogoutButton/>
+              <LogoutButton />
             </div>
           </div>
+
+          <div className="w-full border-t border-black"></div>
 
           {/* Opciones del menú */}
           {options.map((option) => (
@@ -84,9 +91,8 @@ export const GenericView = ({
         </div>
       </div>
 
-
       {/* Contenido principal */}
-      <div className="flex-1 ml-0 md:ml-16 p-4 md:p-5 transition-all">
+      <div className={`flex-1 ml-0 md:ml-16 p-4 md:p-5 transition-all ${sidebarExpanded && "blur-[2px]"} `}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center">
             {/* MÓVIL - Menú Lateral */}
@@ -134,10 +140,10 @@ export const GenericView = ({
                             {user.email}
                           </span>
                         )}
-                        <LogoutButton/>
+                        <LogoutButton />
                       </div>
 
-                      <div className="w-full h-1 border-t border-blue-200"></div>
+                      <div className="w-full border-t border-black"></div>
 
                       {/* Opciones del menú */}
                       <div className="flex-1 overflow-y-auto">
@@ -168,7 +174,7 @@ export const GenericView = ({
             </h1>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center md:text-left">
+          <div className="bg-white rounded-2xl shadow-xl p-6 text-center md:text-left">
             <div className="text-gray-600 text-lg">
               {typeof selected.content === "string" ? <p>{selected.content}</p> : selected.content}
             </div>

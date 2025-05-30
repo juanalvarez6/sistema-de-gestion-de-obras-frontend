@@ -14,8 +14,9 @@ class WorkZoneService extends GenericService<WorkZone, CreateWorkZone> {
     ): Promise<void> {
         try {
             await axios.put(`${this.apiUrl}/${id}/status`,
-                { status }, // Envía el status en el body (mejor práctica para PUT)
+                null,
                 {
+                    params: { status },
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
