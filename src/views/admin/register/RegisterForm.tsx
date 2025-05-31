@@ -74,7 +74,8 @@ export default function RegisterForm({ onClose }: { onClose: () => void }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMessage = errorData.detail || "An unexpected error occurred.";
+        const errorMessage = errorData.message || "An unexpected error occurred.";
+        setError(errorMessage)
         throw new Error(`Error ${response.status}: ${errorMessage}`);
       }
 
@@ -89,7 +90,7 @@ export default function RegisterForm({ onClose }: { onClose: () => void }) {
       }, 1000);
 
     } catch (err) {
-      setError((err as Error).message);
+      console.error((err as Error).message);
     }
   };
 
@@ -97,7 +98,7 @@ export default function RegisterForm({ onClose }: { onClose: () => void }) {
     if (error) {
       const timer = setTimeout(() => {
         setError("");
-      }, 3000);
+      }, 5000);
 
       return () => clearTimeout(timer);
     }

@@ -1,6 +1,5 @@
 import { Plus } from "lucide-react"
 import { useAllUsers } from "../../../hooks/UseUser"
-import { useAuth } from "../../../context/AuthProvider";
 import { useState } from "react";
 import { GenericFilter } from "../../../components/GenericFilter";
 import { UserResponseDto } from "../../../models/UserResponse";
@@ -14,9 +13,7 @@ import RegisterForm from "../register/RegisterForm";
 
 const UsersView = () => {
 
-  const { token } = useAuth();
-
-  const { data: allUsers, isError, isLoading } = useAllUsers(token!);
+  const { data: allUsers, isError, isLoading } = useAllUsers();
   const users = [...(allUsers ?? [])].reverse();
   const [filter, setFilter] = useState<"todos" | "administrador" | "supervisor" | "operador">("todos");
   const [searchedUsers, setSearchedUsers] = useState<UserResponseDto[]>([]);
