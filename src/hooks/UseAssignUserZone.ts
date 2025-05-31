@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, UseMutationResult } from "@tanst
 import { assignUserZoneService } from "../services/AssignUserZoneService";
 import { AssignUserZone, CreateAssignUserZone } from "../models/AssignUserZone";
 import { useAuth } from "../context/AuthProvider";
+import { WorkZone } from "../models/WorkZone";
 
 export const useAssignUserZones = () => {
   const { token } = useAuth();
@@ -59,5 +60,14 @@ export const useDeleteAssignUserZone = () => {
     onError: (error) => {
       console.error("Error al eliminar dato de asiganación de zona:", error.message);
     },
+  });
+};
+
+export const useZoneByUserId = (userId: string) => {
+  const { token } = useAuth();
+  return useQuery<WorkZone>({
+    queryKey: ['user-zone', userId],
+    queryFn: () => assignUserZoneService.fetchZoneByUserId(userId, token!),
+    enabled: !!userId && !!token,
   });
 };

@@ -1,5 +1,6 @@
-import { Mail, BadgeInfo, UserCircle } from "lucide-react";
+import { Mail, BadgeInfo, UserCircle, Map } from "lucide-react";
 import { UserResponseDto } from "../models/UserResponse";
+import { useZoneByUserId } from "../hooks/UseAssignUserZone";
 
 interface Props {
   user: UserResponseDto;
@@ -30,6 +31,17 @@ const UserCard = ({ user }: Props) => {
           <UserCircle className="w-4 h-4 text-gray-500" />
           <strong>Rol:</strong> {user.role}
         </p>
+
+        {user.role === 'OPERADOR' && (() => {
+          const { data: zone } = useZoneByUserId(user.numberID);
+
+          return (
+            <p className="flex items-center gap-2">
+              <Map className="w-4 h-4 text-gray-500" />
+              <strong>Zona Asignada:</strong> {zone?.name || 'Sin zona asignada'}
+            </p>
+          );
+        })()}
       </div>
     </div>
   );
