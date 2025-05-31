@@ -43,4 +43,25 @@ export class UserService {
             throw new Error("Error al obtener los usuarios por rol");
         }
     }
+
+    async fetchUserByIdentification(numberID: string, token: string): Promise<UserResponseDto> {
+        try {
+            const response: AxiosResponse<UserResponseDto> = await axios.get(
+                `${this.API_URL}/identification/${numberID}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                throw new Error("Usuario no encontrado con ese número de identificación");
+            } else if (error.response?.status === 403) {
+                throw new Error("No tienes permiso para ver este usuario");
+            }
+            throw new Error("Error al obtener el usuario por identificación");
+        }
+    }
 }

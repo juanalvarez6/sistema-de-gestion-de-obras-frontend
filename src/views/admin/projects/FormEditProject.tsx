@@ -5,6 +5,7 @@ import { CreateProject, Project } from "../../../models/Project";
 import { MessageModal, MessageType } from "../../../components/MessageModal";
 import { MapPin } from "lucide-react";
 import { GenericModalForm } from "../../../components/FormCommon";
+import { useAllUsersSupervisor } from "../../../hooks/UseUser";
 
 interface FormEditProjectProps {
     projectToEdit: Project;
@@ -21,12 +22,15 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
 
     const { mutate: updateProjectMutation, isSuccess: isSuccessEditProject, isError: isErrorEditProject, isPending: isPendingEditProject } = useUpdateProject();
 
+    const { data: allUsersSupervisor } = useAllUsersSupervisor();
+    const usersSupervisor = [...(allUsersSupervisor ?? [])].reverse();
+
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<"error" | "success" | "warning" | "info">("error");
 
     const [isOpen, setIsOpen] = useState(true);
 
-    const [newProject, setProject] = useState<CreateProject>({
+    const [newProject, setNewProject] = useState<CreateProject>({
         name: projectToEdit.name,
         description: projectToEdit.description,
         latitude: projectToEdit.latitude,
@@ -34,7 +38,7 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
         startDate: projectToEdit.startDate,
         locationRange: projectToEdit.locationRange,
         endDate: projectToEdit.endDate,
-        userId: "1087654654"
+        userId: projectToEdit.userId
     });
 
     const handleClose = () => {
@@ -56,7 +60,7 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
         }
 
         updateProjectMutation({ id: projectToEdit.id, data: newProject });
-        setProject({
+        setNewProject({
             name: projectToEdit.name,
             description: projectToEdit.description,
             latitude: projectToEdit.latitude,
@@ -82,7 +86,7 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
                     type="text"
                     className="w-full p-2 border rounded-lg"
                     value={newProject.name}
-                    onChange={(e) => setProject({ ...newProject, name: e.target.value })}
+                    onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                     required
                 />
             </div>
@@ -93,17 +97,47 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
                     rows={3}
                     className="w-full p-2 border rounded-lg"
                     value={newProject.description}
-                    onChange={(e) => setProject({ ...newProject, description: e.target.value })}
+                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                     required
                 />
             </div>
+
+            {!usersSupervisor || usersSupervisor.length === 0 ? (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">No hay usuarios Disponibles</label>
+                    <input
+                        type="text"
+                        value="No hay proyectos disponibles"
+                        className="w-full p-2 text-sm sm:text-base border border-gray-300 rounded-lg"
+                        disabled
+                    />
+                </div>
+            ) : (
+                <>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Encargado del Proyecto:</label>
+                    <select
+                        name="userId"
+                        className="w-full p-2 text-sm sm:text-base border border-gray-300 rounded-lg mb-4"
+                        value={newProject.userId}
+                        onChange={(e) => setNewProject({ ...newProject, userId: e.target.value })}
+                        required
+                    >
+                        <option value={0} disabled>Selecciona un usuario</option>
+                        {usersSupervisor.map((user, index) => (
+                            <option key={index} value={user.numberID}>
+                                {user.fullName}
+                            </option>
+                        ))}
+                    </select>
+                </>
+            )}
 
             <div className="space-y-2 flex flex-col justify-center items-center">
                 <MapModal
                     onSelect={(lat, lng, locationRange) => {
                         setCoords({ lat, lng });
                         setLocationRange(locationRange);
-                        setProject({ ...newProject, latitude: lat, longitude: lng, locationRange: locationRange });
+                        setNewProject({ ...newProject, latitude: lat, longitude: lng, locationRange: locationRange });
                     }}
                     initialCoords={[Number(projectToEdit.latitude), Number(projectToEdit.longitude)]}
                     locationRange={locationRange}
@@ -132,7 +166,7 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
                         type="date"
                         className="w-full p-2 border rounded-lg"
                         value={newProject.startDate}
-                        onChange={(e) => setProject({ ...newProject, startDate: e.target.value })}
+                        onChange={(e) => setNewProject({ ...newProject, startDate: e.target.value })}
                         required
                     />
                 </div>
@@ -143,7 +177,7 @@ export const FormEditProject = ({ projectToEdit, onClose, onMesaje }: FormEditPr
                         type="date"
                         className="w-full p-2 border rounded-lg"
                         value={newProject.endDate}
-                        onChange={(e) => setProject({ ...newProject, endDate: e.target.value })}
+                        onChange={(e) => setNewProject({ ...newProject, endDate: e.target.value })}
                         required
                     />
                 </div>

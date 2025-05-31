@@ -9,7 +9,6 @@ import PasswordRecovery from "./views/Login/PasswordRecovery";
 
 function App() {
   return (
-
     <>
       <Router>
         <Routes>

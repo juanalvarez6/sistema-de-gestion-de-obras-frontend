@@ -5,6 +5,7 @@ import { CreateProject } from "../../../models/Project";
 import { MessageModal, MessageType } from "../../../components/MessageModal";
 import { MapPin } from "lucide-react";
 import { GenericModalForm } from "../../../components/FormCommon";
+import { useAllUsersSupervisor } from "../../../hooks/UseUser";
 
 
 interface FormAddProjectProps {
@@ -15,6 +16,9 @@ interface FormAddProjectProps {
 export const FormAddProject = ({ onClose, onMesaje }: FormAddProjectProps) => {
     const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
     const { mutate: createProjectMutation, isSuccess: isSuccessAddProject, isPending: isPendingAddProject, isError: isErrorAddProject } = useCreateProject();
+
+    const { data: allUsersSupervisor } = useAllUsersSupervisor();
+    const usersSupervisor = [...(allUsersSupervisor ?? [])].reverse();
 
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<MessageType>("error");
@@ -29,7 +33,7 @@ export const FormAddProject = ({ onClose, onMesaje }: FormAddProjectProps) => {
         locationRange: 50,
         startDate: new Date().toISOString().split("T")[0],
         endDate: new Date().toISOString().split("T")[0],
-        userId: "1088765098"
+        userId: ""
     });
 
     const handleClose = () => {
@@ -42,7 +46,8 @@ export const FormAddProject = ({ onClose, onMesaje }: FormAddProjectProps) => {
             !newProject.name.trim() ||
             !newProject.description.trim() ||
             !newProject.startDate ||
-            !newProject.endDate
+            !newProject.endDate ||
+            !newProject.userId
         ) {
             setMessage("Por favor, completa todos los campos.");
             setMessageType("error");
@@ -97,6 +102,36 @@ export const FormAddProject = ({ onClose, onMesaje }: FormAddProjectProps) => {
                     required
                 />
             </div>
+
+            {!usersSupervisor || usersSupervisor.length === 0 ? (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">No hay usuarios Disponibles</label>
+                    <input
+                        type="text"
+                        value="No hay proyectos disponibles"
+                        className="w-full p-2 text-sm sm:text-base border border-gray-300 rounded-lg"
+                        disabled
+                    />
+                </div>
+            ) : (
+                <>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Encargado del Proyecto:</label>
+                    <select
+                        name="userId"
+                        className="w-full p-2 text-sm sm:text-base border border-gray-300 rounded-lg mb-4"
+                        value={newProject.userId}
+                        onChange={(e) => setNewProject({ ...newProject, userId: e.target.value })}
+                        required
+                    >
+                        <option value={0} disabled>Selecciona un usuario</option>
+                        {usersSupervisor.map((user, index) => (
+                            <option key={index} value={user.numberID}>
+                                {user.fullName}
+                            </option>
+                        ))}
+                    </select>
+                </>
+            )}
 
             <div className="space-y-2 flex flex-col justify-center items-center">
                 <div>

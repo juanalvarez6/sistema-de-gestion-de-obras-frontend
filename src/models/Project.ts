@@ -10,6 +10,7 @@ export interface Project {
     startDate: string;
     endDate: string;
     status: statusProject;
+    userId: string;
     createdAt: string;
 }
 

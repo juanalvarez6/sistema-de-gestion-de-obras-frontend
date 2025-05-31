@@ -1,6 +1,7 @@
 import { Calendar, CalendarCheck, MapPin, Pencil, Trash2 } from "lucide-react";
 import { Project } from "../models/Project";
 import EditProjectStatus from "./EditProjectStatus";
+import { useUserByIdentification } from "../hooks/UseUser";
 //import { useState } from "react";
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
 
 const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
     const showActions = project.status !== "FINALIZADO";
+
+    const { data: user } = useUserByIdentification(project.userId);
 
     return (
         <div className="bg-white rounded-xl shadow-lg border p-4 w-full hover:shadow-xl transition duration-300 relative">
@@ -53,6 +56,8 @@ const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
             </div>
 
             <p className="text-gray-600 text-sm"><strong >Descripción:</strong> {project.description}</p>
+
+            <p className="text-gray-600 text-sm"><strong >Encargado del proyecto: </strong> {user?.fullName}</p>
 
             <div className="grid grid-cols-1 text-sm text-gray-500 p-2">
                 <p className="flex gap-0.5 items-center justify-center">
