@@ -2,7 +2,6 @@ import { Calendar, CalendarCheck, MapPin, Pencil, Trash2 } from "lucide-react";
 import { Project } from "../models/Project";
 import EditProjectStatus from "./EditProjectStatus";
 import { useUserByIdentification } from "../hooks/UseUser";
-//import { useState } from "react";
 
 interface Props {
     project: Project;
@@ -18,28 +17,27 @@ const ProjectCard = ({ project, onEdit, onDelete }: Props) => {
     return (
         <div className="bg-white rounded-xl shadow-lg border p-4 w-full hover:shadow-xl transition duration-300 relative">
             {/* Botones de acción */}
-            {showActions && onEdit && onDelete && (
-                <div>
-                    <div className="absolute bottom-2 left-2">
-                        <button
-                            onClick={() => onEdit(project.id)}
-                            className="p-2 bg-amber-400 text-white rounded-full hover:bg-amber-500 transition-all hover:shadow-xl  duration-300 hover:scale-120"
-                            aria-label="Editar proyecto"
-                        >
-                            <Pencil className="h-4 w-4" />
-                        </button>
-                    </div>
+            {showActions && onEdit && (
+                <div className="absolute bottom-2 left-2">
+                    <button
+                        onClick={() => onEdit(project.id)}
+                        className="p-2 bg-amber-400 text-white rounded-full hover:bg-amber-500 transition-all hover:shadow-xl  duration-300 hover:scale-120"
+                        aria-label="Editar proyecto"
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
 
-                    <div className="absolute bottom-2 right-2">
-                        <button
-                            onClick={() => onDelete(project.id)}
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all hover:shadow-xl  duration-300 hover:scale-120"
-                            aria-label="Eliminar proyecto"
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </button>
-                    </div>
-
+            {showActions && onDelete && (
+                <div className="absolute bottom-2 right-2">
+                    <button
+                        onClick={() => onDelete(project.id)}
+                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all hover:shadow-xl  duration-300 hover:scale-120"
+                        aria-label="Eliminar proyecto"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
                 </div>
             )}
 

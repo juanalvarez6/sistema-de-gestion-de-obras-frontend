@@ -4,7 +4,6 @@ import { useMyProjects } from "../../../hooks/UseProjects";
 import { FormEditProject } from "../../admin/projects/FormEditProject";
 import { Project } from "../../../models/Project";
 import { MessageModal, MessageType } from "../../../components/MessageModal";
-import { FormDeleteProject } from "../../admin/projects/FormDeleteProject";
 import { useProjectSync } from "../../../hooks/useWebSocketSync";
 import { GenericPagination } from "../../../components/GenericPagination";
 import { GenericSearch } from "../../../components/GenericSearch";
@@ -23,7 +22,6 @@ export const ProjectViewSupervisor = () => {
 
     const [filter, setFilter] = useState<"todos" | "en_progreso" | "finalizado" | "suspendido">("todos");
     const [openEditForm, setOpenEditForm] = useState(false);
-    const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
     // 🔥 Estado que guarda la página actual por cada filtro
     const [currentPages, setCurrentPages] = useState({
@@ -118,18 +116,11 @@ export const ProjectViewSupervisor = () => {
                                     setProjectEdit(project);
                                     setOpenEditForm(true);
                                 }}
-                                onDelete={() => {
-                                    setProjectEdit(project);
-                                    setOpenDeleteForm(true);
-                                }}
                             />
                         )}
                     />
                     {openEditForm && projectEdit && (
                         <FormEditProject projectToEdit={projectEdit} onClose={() => setOpenEditForm(false)} onMesaje={(message, type) => setNotification({ message, type })} />
-                    )}
-                    {openDeleteForm && projectEdit && (
-                        <FormDeleteProject projectId={projectEdit.id} onClose={() => setOpenDeleteForm(false)} onMesaje={(message, type) => setNotification({ message, type })} />
                     )}
                 </div>
             )}
