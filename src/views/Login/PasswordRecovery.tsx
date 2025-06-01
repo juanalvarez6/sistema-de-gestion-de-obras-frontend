@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageModal, MessageType } from "../../components/MessageModal";
 
 
 const API_URL = import.meta.env.VITE_USERS_URL;
@@ -10,22 +11,33 @@ export default function PasswordRecovery() {
   const [newPassword, setNewPassword] = useState("");
   const [step, setStep] = useState(1)
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [notification, setNotification] = useState<{ message: string, type: MessageType } | null>(null);
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
+      setNotification({ message: "Enviando código de recuperación...", type: "info" });
+
       const response = await fetch(`${API_URL}/auth/send-reset-code?email=` + email, {
         method: "POST",
       });
 
       if (response.ok) {
-        alert("Código enviado a tu correo");
+        setNotification({ message: "Código enviado a tu correo", type: "success" });
         setStep(2);
+      } else if (response.status === 404) {
+        setNotification({ message: `Correo ${email} no encontrado`, type: "error" });
       } else {
-        alert("Error enviando el código");
+        setNotification({ message: "Error enviando el código", type: "error" });
       }
+
     } catch (error) {
       console.error("Error:", error);
       alert("Hubo un problema");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,10 +59,10 @@ export default function PasswordRecovery() {
 
 
       if (resetResponse.ok) {
-        alert("Contraseña restablecida con éxito");
+        setNotification({ message: "Contraseña restablecida con éxito", type: "success" });
         setStep(1);
       } else {
-        alert("Error al restablecer la contraseña");
+        setNotification({ message: "Error al restablecer la contraseña", type: "error" });
       }
     } catch (error) {
       console.error("Error:", error);
@@ -82,7 +94,7 @@ export default function PasswordRecovery() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-3 rounded-lg transition hover:opacity-90"
               >
-                Enviar código
+                {isLoading ? "Enviando..." : "Enviar código"}
               </button>
             </form>
           </>
@@ -127,6 +139,16 @@ export default function PasswordRecovery() {
           </a>
         </div>
       </div>
+
+      {notification && (
+        <MessageModal
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+          duration={4000}
+        />
+      )}
+
     </div>
   );
 }
