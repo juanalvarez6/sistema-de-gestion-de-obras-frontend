@@ -15,7 +15,7 @@ import { NoResults } from "../../../components/NoResults";
 
 export const ProjectViewAdmin = () => {
 
-    const { data: allpProjects, isError, isLoading } = useProjects();
+    const { data: allpProjects, isError, isLoading } = useProjects(true);
     const projects = [...(allpProjects ?? [])].reverse();
 
     useProjectSync();

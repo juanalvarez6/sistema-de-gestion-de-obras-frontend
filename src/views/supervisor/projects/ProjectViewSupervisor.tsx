@@ -12,7 +12,7 @@ import { NoResults } from "../../../components/NoResults";
 
 export const ProjectViewSupervisor = () => {
 
-    const { data: projects, isError, isLoading } = useMyProjects();
+    const { data: projects, isError, isLoading } = useMyProjects(true);
 
     useProjectSync();
 

@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { MessageType } from "../../../components/MessageModal";
 import { useUpdateWorkZone } from "../../../hooks/UseWorkZone";
 import { WorkZone } from "../../../models/WorkZone";
-import { useProjects } from "../../../hooks/UseProjects";
+import { useMyProjects, useProjects } from "../../../hooks/UseProjects";
 import { GenericModalForm } from "../../../components/FormCommon";
+import { useAuth } from "../../../context/AuthProvider";
 
 interface FormEditZoneProps {
   zone: WorkZone;
@@ -12,8 +13,17 @@ interface FormEditZoneProps {
 }
 
 export const FormEditZone = ({ zone, onClose, onMesaje }: FormEditZoneProps) => {
+  const { user } = useAuth();
+
   const { mutate: updateZoneMutation, isError, isSuccess, isPending } = useUpdateWorkZone();
-  const { data: allProjects } = useProjects();
+
+  const isAdmin = user?.role === "ADMINISTRADOR";
+  const isSupervisor = user?.role === "SUPERVISOR";
+
+  const { data: adminProjects } = useProjects(isAdmin);
+  const { data: supervisorZones } = useMyProjects(isSupervisor);
+
+  const allProjects = isAdmin ? adminProjects : supervisorZones;
 
   const projects = [...(allProjects ?? [])]
     .reverse()

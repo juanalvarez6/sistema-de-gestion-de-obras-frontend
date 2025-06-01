@@ -4,13 +4,14 @@ import { Project, CreateProject } from "../models/Project";
 import { useAuth } from "../context/AuthProvider";
 
 // Obtener todos los proyectos con manejo de errores
-export const useProjects = () => {
+export const useProjects = (enabled: boolean) => {
   const { token } = useAuth();
   return useQuery<Project[], Error>({
     queryKey: ["projects"],
     queryFn: () => projectService.fetchAll(token!),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    enabled: enabled && !!token,
   });
 };
 
@@ -84,12 +85,12 @@ export const useUpdateProjectStatus = (): UseMutationResult<void, Error, { id: n
   });
 };
 
-export const useMyProjects = () => {
+export const useMyProjects = (enabled: boolean) => {
   const { token } = useAuth();
 
   return useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: () => projectService.fetchMyProjects(token!),
-    enabled: !!token,
+    enabled: enabled && !!token,
   });
 };

@@ -1,6 +1,6 @@
 import { GenericService } from './GenericService';
 import { WorkZone, CreateWorkZone } from '../models/WorkZone';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 class WorkZoneService extends GenericService<WorkZone, CreateWorkZone> {
     constructor() {
@@ -31,6 +31,22 @@ class WorkZoneService extends GenericService<WorkZone, CreateWorkZone> {
                 throw new Error('No tienes permisos para actualizar WorkZones');
             }
             throw new Error(`Error al actualizar el estado de WorkZone con ID ${id}: ${error.message}`);
+        }
+    }
+
+    async fetchMyWorkZones(token: string): Promise<WorkZone[]> {
+        try {
+            const response: AxiosResponse<WorkZone[]> = await axios.get(`${this.apiUrl}/my-zones`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                throw new Error("No autorizado - Token inválido o expirado");
+            }
+            throw new Error("Error al obtener las zonas de trabajo del usuario");
         }
     }
 

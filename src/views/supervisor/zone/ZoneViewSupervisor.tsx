@@ -1,25 +1,27 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { MessageModal, MessageType } from "../../../components/MessageModal";
-import FormAddZone from "./FormAddZone";
-import { useWorkZones } from "../../../hooks/UseWorkZone";
+import FormAddZone from "../../admin/zones/FormAddZone";
+import { useMyWorkZones } from "../../../hooks/UseWorkZone";
 import { GenericFilter } from "../../../components/GenericFilter";
 import { GenericSearch } from "../../../components/GenericSearch";
 import { WorkZone } from "../../../models/WorkZone";
 import { NoResults } from "../../../components/NoResults";
 import { GenericPagination } from "../../../components/GenericPagination";
 import ZoneCard from "../../../components/ZoneCard";
-import FormEditZone from "./FormEditZone";
-import FormDeleteZone from "./FormDeleteZone";
+import FormEditZone from "../../admin/zones/FormEditZone";
+import FormDeleteZone from "../../admin/zones/FormDeleteZone";
 import { useWorkZoneSync } from "../../../hooks/useWebSocketSync";
-import { useProjects } from "../../../hooks/UseProjects";
+import { useMyProjects } from "../../../hooks/UseProjects";
 
-export const ZoneViewAdmin = () => {
+export const ZoneViewSupervisor = () => {
 
-    const { data: allZones, isError, isLoading } = useWorkZones();
+    const { data: allZones, isError, isLoading } = useMyWorkZones();
     const zones = [...(allZones ?? [])].reverse();
 
-    const { data: projects } = useProjects(true);
+    
+
+    const { data: projects } = useMyProjects(true);
 
     useWorkZoneSync();
 

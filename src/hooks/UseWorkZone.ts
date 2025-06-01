@@ -85,3 +85,13 @@ export const useUpdateWorkZoneStatus = (): UseMutationResult<
     },
   });
 };
+
+export const useMyWorkZones = () => {
+  const { token } = useAuth();
+
+  return useQuery<WorkZone[]>({
+    queryKey: ["workZones"],
+    queryFn: () => workZoneService.fetchMyWorkZones(token!),
+    enabled: !!token,
+  });
+};
