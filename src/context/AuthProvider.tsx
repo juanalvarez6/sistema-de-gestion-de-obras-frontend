@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { UserResponseDto } from '../models/UserResponse';
 import { MessageModal } from '../components/MessageModal';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: UserResponseDto | null;
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserResponseDto | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const [showExpirationWarning, setShowExpirationWarning] = useState(false);
   const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -90,6 +92,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("genericViewSelectedOption");
+
+    queryClient.removeQueries();
 
     if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current);
     if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
