@@ -1,26 +1,30 @@
 import { useQuery, useMutation, useQueryClient, UseMutationResult } from "@tanstack/react-query";
 import { taskService } from "../services/TaskService";
 import { Task, CreateTask } from "../models/Task";
+import { useAuth } from "../context/AuthProvider";
 
 export const useTasks = () => {
-    return useQuery<Task[], Error>({
-        queryKey: ["tasks"],
-        queryFn: () => taskService.fetchAll(),
-    });
+  const { token } = useAuth();
+  return useQuery<Task[], Error>({
+    queryKey: ["tasks"],
+    queryFn: () => taskService.fetchAll(token!),
+  });
 };
 
-export const useTask = (id: number) => {
-    return useQuery<Task, Error>({
-        queryKey: ["task", id],
-        queryFn: () => taskService.fetchById(id),
-        enabled: !!id,
-    });
+export const useTask = (id: number,) => {
+  const { token } = useAuth();
+  return useQuery<Task, Error>({
+    queryKey: ["task", id],
+    queryFn: () => taskService.fetchById(id, token!),
+    enabled: !!id,
+  });
 };
 
 export const useCreateTask = (): UseMutationResult<Task, Error, CreateTask> => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<Task, Error, CreateTask>({
-    mutationFn: (data) => taskService.create(data),
+    mutationFn: (data) => taskService.create(data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
@@ -31,22 +35,24 @@ export const useCreateTask = (): UseMutationResult<Task, Error, CreateTask> => {
 };
 
 export const useUpdateTask = () => {
-    const queryClient = useQueryClient();
-    return useMutation<Task, Error, { id: number; data: Partial<CreateTask> }>({
-        mutationFn: ({id, data}) => taskService.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["tasks"] });
-        },
-        onError: (error) => {
-            console.error("Error al actualizar la tarea:", error.message);
-        }
-    });
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation<Task, Error, { id: number; data: Partial<CreateTask> }>({
+    mutationFn: ({ id, data }) => taskService.update(id, data, token!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: (error) => {
+      console.error("Error al actualizar la tarea:", error.message);
+    }
+  });
 };
 
 export const useDeleteTask = () => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<void, Error, number>({
-    mutationFn: (id) => taskService.delete(id),
+    mutationFn: (id) => taskService.delete(id, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },

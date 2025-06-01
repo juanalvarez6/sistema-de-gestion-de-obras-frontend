@@ -1,26 +1,30 @@
 import { useQuery, useMutation, useQueryClient, UseMutationResult } from "@tanstack/react-query";
 import { inventoryService } from "../services/InventoryService";
 import { Inventory, CreateInventory } from "../models/Inventory";
+import { useAuth } from "../context/AuthProvider";
 
 export const useInventories = () => {
-    return useQuery<Inventory[], Error>({
-        queryKey: ["inventories"],
-        queryFn: () => inventoryService.fetchAll(),
-    });
+  const { token } = useAuth();
+  return useQuery<Inventory[], Error>({
+    queryKey: ["inventories"],
+    queryFn: () => inventoryService.fetchAll(token!),
+  });
 };
 
 export const useInventory = (id: number) => {
-    return useQuery<Inventory, Error>({
-        queryKey: ["inventory", id],
-        queryFn: () => inventoryService.fetchById(id),
-        enabled: !!id,
-    });
+  const { token } = useAuth();
+  return useQuery<Inventory, Error>({
+    queryKey: ["inventory", id],
+    queryFn: () => inventoryService.fetchById(id, token!),
+    enabled: !!id,
+  });
 };
 
 export const useCreateInventory = (): UseMutationResult<Inventory, Error, CreateInventory> => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<Inventory, Error, CreateInventory>({
-    mutationFn: (data) => inventoryService.create(data),
+    mutationFn: (data) => inventoryService.create(data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventories"] });
     },
@@ -31,22 +35,24 @@ export const useCreateInventory = (): UseMutationResult<Inventory, Error, Create
 };
 
 export const useUpdateInventory = () => {
-    const queryClient = useQueryClient();
-    return useMutation<Inventory, Error, { id: number; data: Partial<CreateInventory> }>({
-        mutationFn: ({id, data}) => inventoryService.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["inventories"] });
-        },
-        onError: (error) => {
-            console.error("Error al actualizar dato del inventario:", error.message);
-        }
-    });
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation<Inventory, Error, { id: number; data: Partial<CreateInventory> }>({
+    mutationFn: ({ id, data }) => inventoryService.update(id, data, token!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventories"] });
+    },
+    onError: (error) => {
+      console.error("Error al actualizar dato del inventario:", error.message);
+    }
+  });
 };
 
 export const useDeleteInventory = () => {
+  const { token } = useAuth();
   const queryClient = useQueryClient();
   return useMutation<void, Error, number>({
-    mutationFn: (id) => inventoryService.delete(id),
+    mutationFn: (id) => inventoryService.delete(id, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventories"] });
     },

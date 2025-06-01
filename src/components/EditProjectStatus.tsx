@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useUpdateProjectStatus } from "../../../hooks/UseProjects";
-import { Project, statusProject } from "../../../models/Project";
-import { MessageModal, MessageType } from "../../../components/MessageModal";
+import { useUpdateProjectStatus } from "../hooks/UseProjects";
+import { Project, statusProject } from "../models/Project";
+import { MessageModal, MessageType } from "../components/MessageModal";
 
 interface EditProjectStatusProps {
   project: Project,
@@ -18,11 +18,8 @@ const EditProjectStatus = ({ project }: EditProjectStatusProps) => {
   const status = statusStyles[project.status];
   const [notification, setNotification] = useState<{ message: string, type: MessageType } | null>(null);
 
-  //const [selectedStatus, setSelectedStatus] = useState<statusProject>(project.status);
-
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as statusProject;
-    //setSelectedStatus(newStatus);
     updateStatus({ id: project.id, status: newStatus });
   };
 

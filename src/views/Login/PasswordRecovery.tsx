@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { MessageModal, MessageType } from "../../components/MessageModal";
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_USERS_URL;
 
 
 export default function PasswordRecovery() {
@@ -10,22 +11,33 @@ export default function PasswordRecovery() {
   const [newPassword, setNewPassword] = useState("");
   const [step, setStep] = useState(1)
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [notification, setNotification] = useState<{ message: string, type: MessageType } | null>(null);
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
+      setNotification({ message: "Enviando código de recuperación...", type: "info" });
+
       const response = await fetch(`${API_URL}/auth/send-reset-code?email=` + email, {
         method: "POST",
       });
-  
+
       if (response.ok) {
-        alert("Código enviado a tu correo");
+        setNotification({ message: "Código enviado a tu correo", type: "success" });
         setStep(2);
+      } else if (response.status === 404) {
+        setNotification({ message: `Correo ${email} no encontrado`, type: "error" });
       } else {
-        alert("Error enviando el código");
+        setNotification({ message: "Error enviando el código", type: "error" });
       }
+
     } catch (error) {
       console.error("Error:", error);
       alert("Hubo un problema");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,30 +47,28 @@ export default function PasswordRecovery() {
       const bodyData = JSON.stringify({
         email,
         verificationCode,
-        newPassword, 
+        newPassword,
       });
 
-  
+
       const resetResponse = await fetch(`${API_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: bodyData,
       });
-  
-      
+
+
       if (resetResponse.ok) {
-        alert("Contraseña restablecida con éxito");
+        setNotification({ message: "Contraseña restablecida con éxito", type: "success" });
         setStep(1);
       } else {
-        alert("Error al restablecer la contraseña");
+        setNotification({ message: "Error al restablecer la contraseña", type: "error" });
       }
     } catch (error) {
       console.error("Error:", error);
       alert("Hubo un problema");
     }
   };
-  
-
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -66,15 +76,15 @@ export default function PasswordRecovery() {
         {step === 1 ? (
           <>
             <h2 className="text-2xl font-semibold text-gray-700 text-center mb-4">
-              Reset Password
+              Restablecer contraseña
             </h2>
             <p className="text-gray-500 text-center mb-6">
-              Enter your email and we will send you a verification code.
+              Ingresa tu correo y te enviaremos un código de verificación.
             </p>
             <form onSubmit={handleSendCode} className="space-y-4">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Introduce tu correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -84,22 +94,22 @@ export default function PasswordRecovery() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-3 rounded-lg transition hover:opacity-90"
               >
-                Send Code
+                {isLoading ? "Enviando..." : "Enviar código"}
               </button>
             </form>
           </>
         ) : (
           <>
             <h2 className="text-2xl font-semibold text-gray-700 text-center mb-4">
-              Verify Code
+              Código de verificación
             </h2>
             <p className="text-gray-500 text-center mb-6">
-              Enter the code we sent to your email and set a new password.
+              Ingresa el código que te enviamos a tu correo electrónico y establece una nueva contraseña.
             </p>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <input
                 type="text"
-                placeholder="Enter verification code"
+                placeholder="Ingresa el código de verificación"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -107,7 +117,7 @@ export default function PasswordRecovery() {
               />
               <input
                 type="password"
-                placeholder="Enter new password"
+                placeholder="Ingresa una nueva contraseña"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -117,18 +127,28 @@ export default function PasswordRecovery() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-3 rounded-lg transition hover:opacity-90"
               >
-                Reset Password
+                Restablecer contraseña
               </button>
             </form>
           </>
         )}
 
         <div className="text-center mt-4">
-          <a href="/login" className="text-pink-500 font-semibold">
-            Back to Login
+          <a href="/" className="text-pink-500 font-semibold">
+            Volver al inicio de sesión
           </a>
         </div>
       </div>
+
+      {notification && (
+        <MessageModal
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+          duration={4000}
+        />
+      )}
+
     </div>
   );
 }
