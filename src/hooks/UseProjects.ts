@@ -83,3 +83,13 @@ export const useUpdateProjectStatus = (): UseMutationResult<void, Error, { id: n
     },
   });
 };
+
+export const useMyProjects = () => {
+  const { token } = useAuth();
+
+  return useQuery<Project[]>({
+    queryKey: ['projects'],
+    queryFn: () => projectService.fetchMyProjects(token!),
+    enabled: !!token,
+  });
+};

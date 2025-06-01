@@ -8,11 +8,12 @@ import {
   BarChartBig,
   CheckSquare,
 } from "lucide-react";
+import { ProjectViewSupervisor } from "./projects/ProjectViewSupervisor";
 
 
 const SupervisorView = () => {
   const options = [
-    { id: 1, label: "Proyectos", icon: <FolderKanban size={20} />, content: "Vista de Proyectos" },
+    { id: 1, label: "Proyectos", icon: <FolderKanban size={20} />, content: <ProjectViewSupervisor/> },
     { id: 2, label: "Zonas", icon: <Map size={20} />, content: "Vista de zonas" },
     { id: 3, label: "Materiales", icon: <Boxes size={20} />, content: "Vista de Materiales" },
     { id: 4, label: "Inventario", icon: <Warehouse size={20} />, content: "Vista de inventario" },

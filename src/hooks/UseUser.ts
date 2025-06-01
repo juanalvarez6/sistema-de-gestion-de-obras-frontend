@@ -15,13 +15,13 @@ export const useAllUsers = () => {
     });
 };
 
-export const useAllUsersSupervisor = () => {
+export const useAllUsersSupervisor = (enabled: boolean) => {
     const { token } = useAuth();
     const role: RoleType = "SUPERVISOR";
     return useQuery<UserResponseDto[]>({
         queryKey: ["users-supervisor", role],
         queryFn: () => new UserService().fetchUsersByRole(role, token!),
-        enabled: !!token && !!role,
+        enabled: !!token && !!role && enabled,
     });
 };
 
