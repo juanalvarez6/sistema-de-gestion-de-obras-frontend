@@ -10,3 +10,8 @@ export interface CreateAssignUserZone {
     userId: string;
     zoneId: number;
 }
+
+export interface AssignUsersToZoneDto {
+  zoneId: number;
+  userIds: string[];
+}

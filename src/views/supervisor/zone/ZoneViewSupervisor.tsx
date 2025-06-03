@@ -13,13 +13,15 @@ import FormEditZone from "../../admin/zones/FormEditZone";
 import FormDeleteZone from "../../admin/zones/FormDeleteZone";
 import { useWorkZoneSync } from "../../../hooks/useWebSocketSync";
 import { useMyProjects } from "../../../hooks/UseProjects";
+import { UserSelectTableModal } from "../../../components/UserSelectTable";
+import { useAllUsersOperator } from "../../../hooks/UseUser";
 
 export const ZoneViewSupervisor = () => {
 
     const { data: allZones, isError, isLoading } = useMyWorkZones();
     const zones = [...(allZones ?? [])].reverse();
 
-    
+
 
     const { data: projects } = useMyProjects(true);
 
@@ -29,6 +31,9 @@ export const ZoneViewSupervisor = () => {
 
     const [searchedZones, setSearchedZones] = useState<WorkZone[]>([]);
 
+    const { data: users } = useAllUsersOperator()
+
+    const [openSelectedUser, setOpenSelectedUser] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
     const [openEditForm, setOpenEditForm] = useState(false);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
@@ -144,6 +149,22 @@ export const ZoneViewSupervisor = () => {
                         onSearchResults={setSearchedZones}
                         className="mb-4"
                     />
+
+                    <div className="my-4">
+                        <button
+                            onClick={() => setOpenSelectedUser(true)}
+                            className="mx-auto md:m-0 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                        >
+                            Asignar usuario a zona
+                        </button>
+
+                        {openSelectedUser && (
+                            <UserSelectTableModal
+                                users={users ?? []}
+                                onClose={() => setOpenSelectedUser(false)}
+                            />
+                        )}
+                    </div>
 
                     {/* Mensaje cuando no hay resultados */}
                     {filteredZones.length === 0 && (

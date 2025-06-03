@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, UseMutationResult, useQueries } from "@tanstack/react-query";
 import { workZoneService } from "../services/WorkZoneService";
 import { WorkZone, CreateWorkZone } from "../models/WorkZone";
 import { useAuth } from "../context/AuthProvider";
@@ -94,4 +94,48 @@ export const useMyWorkZones = () => {
     queryFn: () => workZoneService.fetchMyWorkZones(token!),
     enabled: !!token,
   });
+};
+
+export const useZonesByProjectId = (projectId?: number) => {
+  const { token } = useAuth();
+
+  return useQuery<WorkZone[]>({
+    queryKey: ['zones-by-project', projectId],
+    queryFn: () => workZoneService.fetchZonesByProjectId(projectId!, token!),
+    enabled: !!projectId && !!token,
+  });
+};
+
+export const useZonesByAllProjects = (projectIds: number[]) => {
+  const { token } = useAuth();
+
+  const results = useQueries({
+    queries: projectIds.map((projectId) => ({
+      queryKey: ['zones-by-project', projectId],
+      queryFn: () => workZoneService.fetchZonesByProjectId(projectId, token!),
+      enabled: !!token,
+    })),
+  });
+
+  const isLoading = results.some((res) => res.isLoading);
+  const error = results.find((res) => res.error)?.error;
+
+  const data = results.reduce((acc, res, index) => {
+    const projectId = projectIds[index];
+    if (res.data) {
+      acc[projectId] = res.data;
+    }
+    return acc;
+  }, {} as Record<number, WorkZone[]>);
+
+  const projectsWithoutZones = projectIds.filter(
+    (id) => !data[id] || data[id].length === 0
+  );
+
+  return {
+    data,
+    isLoading,
+    error,
+    projectsWithoutZones,
+  };
 };

@@ -50,6 +50,26 @@ class WorkZoneService extends GenericService<WorkZone, CreateWorkZone> {
         }
     }
 
+    async fetchZonesByProjectId(projectId: number, token: string): Promise<WorkZone[]> {
+        try {
+            const response: AxiosResponse<WorkZone[]> = await axios.get(
+                `${this.apiUrl}/zoneByProjectId`,
+                {
+                    params: { projectId },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                throw new Error("No tienes permiso para acceder a esta información");
+            }
+            throw new Error("Error al obtener las zonas del proyecto");
+        }
+    }
+
 }
 
 export const workZoneService = new WorkZoneService();

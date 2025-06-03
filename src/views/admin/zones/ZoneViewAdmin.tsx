@@ -13,6 +13,8 @@ import FormEditZone from "./FormEditZone";
 import FormDeleteZone from "./FormDeleteZone";
 import { useWorkZoneSync } from "../../../hooks/useWebSocketSync";
 import { useProjects } from "../../../hooks/UseProjects";
+import { UserSelectTableModal } from "../../../components/UserSelectTable";
+import { useAllUsersOperator } from "../../../hooks/UseUser";
 
 export const ZoneViewAdmin = () => {
 
@@ -20,13 +22,15 @@ export const ZoneViewAdmin = () => {
     const zones = [...(allZones ?? [])].reverse();
 
     const { data: projects } = useProjects(true);
-
     useWorkZoneSync();
+
+    const { data: users } = useAllUsersOperator()
 
     const [selectedProject, setSelectedProject] = useState("");
 
     const [searchedZones, setSearchedZones] = useState<WorkZone[]>([]);
 
+    const [openSelectedUser, setOpenSelectedUser] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
     const [openEditForm, setOpenEditForm] = useState(false);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
@@ -66,7 +70,7 @@ export const ZoneViewAdmin = () => {
 
     return (
         <>
-            <div className="flex justify-between flex-wrap">
+            <div className="flex justify-between flex-col md:flex-row">
                 <h2 className="text-2xl font-semibold text-gray-800 md:m-0 mx-auto">
                     Gestión de Zonas
                 </h2>
@@ -74,15 +78,14 @@ export const ZoneViewAdmin = () => {
                 {/* Nueva Zona */}
                 <div className="my-4 sm:my-0 mx-auto md:m-0">
                     {/* Botón para Nueva Zona */}
-                    {!openAddForm && (
-                        <button
-                            onClick={() => setOpenAddForm(true)}
-                            className="mx-auto md:m-0 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-                        >
-                            <Plus />
-                            Nueva Zona
-                        </button>
-                    )}
+
+                    <button
+                        onClick={() => setOpenAddForm(true)}
+                        className="mx-auto md:m-0 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                    >
+                        <Plus />
+                        Nueva Zona
+                    </button>
 
                     {/* Formulario */}
                     {openAddForm && (
@@ -142,6 +145,22 @@ export const ZoneViewAdmin = () => {
                         onSearchResults={setSearchedZones}
                         className="mb-4"
                     />
+
+                    <div className="my-4">
+                        <button
+                            onClick={() => setOpenSelectedUser(true)}
+                            className="mx-auto md:m-0 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                        >
+                            Asignar usuario a zona
+                        </button>
+
+                        {openSelectedUser && (
+                            <UserSelectTableModal
+                                users={users ?? []}
+                                onClose={() => setOpenSelectedUser(false)}
+                            />
+                        )}
+                    </div>
 
                     {/* Mensaje cuando no hay resultados */}
                     {filteredZones.length === 0 && (
