@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "../services/UserService";
-import { RoleType, UserResponseDto } from "../models/UserResponse";
+import { RegisterUserDto, RoleType, UserResponseDto } from "../models/UserResponse";
 import { useAuth } from "../context/AuthProvider";
 
 const userService = new UserService();
@@ -42,5 +42,24 @@ export const useUserByIdentification = (numberID: string) => {
         queryKey: ['user-identification', numberID],
         queryFn: () => new UserService().fetchUserByIdentification(numberID, token!),
         enabled: !!token && !!numberID,
+    });
+};
+
+export const useUpdateUser = () => {
+    const queryClient = useQueryClient();
+    const { token, user, setUser } = useAuth();
+
+    return useMutation<UserResponseDto, Error, { id: number; data: RegisterUserDto }>({
+        mutationFn: ({ id, data }) => new UserService().updateUser(id, data, token!),
+        onSuccess: (data) => {
+            if (user?.id === data.id) {
+                setUser(data);
+                localStorage.setItem("user", JSON.stringify(data));
+            }
+            queryClient.invalidateQueries({ queryKey: ['user-identification', data.id] });
+            queryClient.invalidateQueries({ queryKey: ['all-users'] });
+            queryClient.invalidateQueries({ queryKey: ['users-supervisor', 'SUPERVISOR'] });
+            queryClient.invalidateQueries({ queryKey: ['users-operator', 'OPERADOR'] });
+        },
     });
 };

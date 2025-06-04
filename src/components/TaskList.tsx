@@ -1,40 +1,28 @@
 import { useState, useEffect } from "react";
+import { Task } from "../models/Task";
 
-interface Task {
-  id: number;
-  zone: {
-    id: number;
-    name: string;
-    locationName: string;
-  };
-  user: {
-    id: number;
-    name: string;
-  };
-  description: string;
-  status: "pendiente" | "en curso" | "completada";
-  assignmentDate: Date;
-  completionDate: Date;
-  priority: "alta" | "media" | "baja";
-}
-
+// Ajuste de las opciones de estado para que coincidan con la interfaz
 const taskStatusOptions = {
-  pendiente: { text: "🔵 Pendiente", color: "text-blue-600" },
-  "en curso": { text: "🟢 En curso", color: "text-green-600" },
-  completada: { text: "✅ Completada", color: "text-gray-600" },
+  PENDIENTE: { text: "🔵 Pendiente", color: "text-blue-600" },
+  EN_PROGRESO: { text: "🟢 En progreso", color: "text-green-600" },
+  COMPLETADA: { text: "✅ Completada", color: "text-gray-600" },
+  CANCELADA: { text: "❌ Cancelada", color: "text-red-600" },
 };
 
-const priorityOptions = {
-  alta: { text: "🔴 Alta", color: "text-red-600" },
-  media: { text: "🟡 Media", color: "text-yellow-600" },
-  baja: { text: "🟢 Baja", color: "text-green-600" },
+const taskStatusBgColors = {
+  PENDIENTE: "bg-blue-100",
+  EN_PROGRESO: "bg-gray-100",
+  COMPLETADA: "bg-green-100",
+  CANCELADA: "bg-red-100"
 };
+
+// Eliminé las opciones de prioridad ya que no están en la interfaz Task
 
 interface TaskListProps {
   tasks: Task[];
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
+const TaskList = ({ tasks }: TaskListProps) => {
   const [taskList, setTaskList] = useState<Task[]>(tasks);
 
   useEffect(() => {
@@ -48,38 +36,40 @@ const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
   };
 
   return (
-    <div className="p-4 bg-white shadow-lg rounded-lg">
+    <>
       <h2 className="text-xl font-semibold mb-2">Mis Tareas</h2>
       {taskList.map(task => (
-        <div key={task.id} className="bg-gray-200 p-4 rounded-lg mb-2">
-          <p className="font-semibold">{task.description}</p>
+        <div key={task.id} className={`p-4 rounded-lg mb-2 ${taskStatusBgColors[task.status]}`}>
+          <h3 className="font-bold">{task.name}</h3> {/* Añadido el campo name */}
+          <p className="text-sm">{task.description}</p>
           <p className={`text-sm ${taskStatusOptions[task.status].color}`}>
             Estado: {taskStatusOptions[task.status].text}
           </p>
-          <p className={`text-sm ${priorityOptions[task.priority].color}`}>
-            Prioridad: {priorityOptions[task.priority].text}
+          <p className="text-xs text-gray-500">
+            Zona: {task.zone.name} {/* Cambiado locationName por name ya que no existe en WorkZone */}
           </p>
           <p className="text-xs text-gray-500">
-            Zona: {task.zone.name} ({task.zone.locationName})
+            Trabajador ID: {task.userId} {/* Cambiado ya que la interfaz solo tiene userId */}
           </p>
-          <p className="text-xs text-gray-500">
-            Trabajador: {task.user.name}
-          </p>
-          <p className="text-xs text-gray-500">
-            Asignada: {new Date(task.assignmentDate).toLocaleDateString()}
-          </p>
+          {/* Eliminado assignmentDate ya que no está en la interfaz */}
+          {task.evidence && ( // Mostrar evidencia si existe
+            <p className="text-xs text-gray-500">
+              Evidencia: {task.evidence}
+            </p>
+          )}
           <select
             className="mt-2 p-1 border rounded-lg w-full"
             value={task.status}
             onChange={e => handleStatusChange(task.id, e.target.value as Task["status"])}
           >
-            <option value="pendiente">🔵 Pendiente</option>
-            <option value="en curso">🟢 En curso</option>
-            <option value="completada">✅ Completada</option>
+            <option value="PENDIENTE">🔵 Pendiente</option>
+            <option value="EN_PROGRESO">🟢 En progreso</option>
+            <option value="COMPLETADA">✅ Completada</option>
+            <option value="CANCELADA">❌ Cancelada</option>
           </select>
         </div>
       ))}
-    </div>
+    </>
   );
 };
 

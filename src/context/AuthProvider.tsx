@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (token: string, user: UserResponseDto, expiresIn: number) => void;
   logout: () => void;
   loading: boolean;
+  setUser: (user: UserResponseDto | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -113,6 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         loading,
+        setUser,
       }}
     >
       {children}

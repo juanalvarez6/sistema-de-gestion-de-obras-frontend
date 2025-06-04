@@ -6,4 +6,11 @@ export interface UserResponseDto {
   role: RoleType;
 }
 
+export interface RegisterUserDto {
+  email: string;
+  fullName: string;
+  role: RoleType;
+  numberID: string;
+}
+
 export type RoleType = 'ADMINISTRADOR' | 'SUPERVISOR' | 'OPERADOR';
