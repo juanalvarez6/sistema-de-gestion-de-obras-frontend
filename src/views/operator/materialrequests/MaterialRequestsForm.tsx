@@ -1,11 +1,15 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../../../context/AuthProvider";
 import { useCreateMaterialRequest, useMaterialRequestsByUserId } from "../../../hooks/UseMaterialRequest";
-import { useMaterials } from "../../../hooks/UseMaterial";
+import { useCreateMaterial, useMaterials } from "../../../hooks/UseMaterial";
 import { CreateMaterialRequest, MaterialRequest } from "../../../models/MaterialRequest";
+import { CreateMaterial } from "../../../models/Material";
 import { useZoneByUserId } from "../../../hooks/UseAssignUserZone";
 import { Loader2, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { MessageModal, MessageType } from "../../../components/MessageModal";
+import { FormDeleteMaterialRequest } from "./FormDeleteMaterialRequests";
+import { FormEditMaterialRequest } from "./FormEditMaterialRequests";
 
 export const MaterialRequestForm = () => {
     const { user } = useAuth();
@@ -14,7 +18,8 @@ export const MaterialRequestForm = () => {
     const { data: zone } = useZoneByUserId(user?.numberID ?? "");
     const project = zone?.project;
 
-    const { data: requests = [], isLoading: isLoadingMaterialRequests } = useMaterialRequestsByUserId(user?.numberID ?? "");
+    const { data, isLoading: isLoadingMaterialRequests } = useMaterialRequestsByUserId(user?.numberID ?? "");
+    const requests = data ?? [];
 
     const [formData, setFormData] = useState({
         materialId: "",
@@ -24,7 +29,17 @@ export const MaterialRequestForm = () => {
         deliveryDate: "",
     });
 
+
+    const [notification, setNotification] = useState<{ message: string, type: MessageType } | null>(null);
+
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const [isOtherMaterial, setIsOtherMaterial] = useState(false);
+    const createMaterial = useCreateMaterial();
+    const [newMaterial, setNewMaterial] = useState<CreateMaterial>({
+        name: "",
+        unit: ""
+    });
 
     const selectedMaterial = materials?.find((mat) => mat.id === Number(formData.materialId));
 
@@ -34,7 +49,7 @@ export const MaterialRequestForm = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const newErrors: Record<string, string> = {};
@@ -43,9 +58,11 @@ export const MaterialRequestForm = () => {
             newErrors.quantity = "Ingrese una cantidad válida.";
         if (!formData.materialQuality) newErrors.materialQuality = "Seleccione la calidad.";
         if (!formData.deliveryDate) newErrors.deliveryDate = "Seleccione la fecha de entrega.";
+        if (!project?.id) newErrors.projectId = "No se encontró el proyecto asociado a la zona.";
 
-        if (!project?.id) {
-            newErrors.projectId = "No se encontró el proyecto asociado a la zona.";
+        if (isOtherMaterial) {
+            if (!newMaterial.name) newErrors.newMaterialName = "Nombre requerido.";
+            if (!newMaterial.unit) newErrors.newMaterialUnit = "Unidad requerida.";
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -53,8 +70,23 @@ export const MaterialRequestForm = () => {
             return;
         }
 
+        let materialIdToUse = Number(formData.materialId);
+
+        if (isOtherMaterial) {
+            try {
+                const created = await createMaterial.mutateAsync({
+                    name: newMaterial.name,
+                    unit: newMaterial.unit,
+                });
+                materialIdToUse = created.id;
+            } catch (err) {
+                console.error("Error al crear nuevo material", err);
+                return;
+            }
+        }
+
         const request: CreateMaterialRequest = {
-            materialId: Number(formData.materialId),
+            materialId: materialIdToUse,
             projectId: project!.id,
             userId: user?.numberID ?? "",
             requestedQuantity: Number(formData.quantity),
@@ -63,7 +95,25 @@ export const MaterialRequestForm = () => {
             deliveryDate: formData.deliveryDate,
         };
 
-        createRequest.mutate(request);
+        createRequest.mutate(request, {
+            onSuccess: () => {
+                setFormData({
+                    materialId: "",
+                    quantity: "",
+                    comments: "",
+                    materialQuality: "",
+                    deliveryDate: "",
+                });
+                setNewMaterial({ name: "", unit: "" });
+                setErrors({});
+                setIsOtherMaterial(false);
+                setNotification({ message: "Solicitud guardada", type: "success" });
+            },
+            onError: () => {
+                setNotification({ message: "Error al guardar solicitud", type: "success" });
+            }
+        }
+        );
     };
 
     return (
@@ -78,9 +128,15 @@ export const MaterialRequestForm = () => {
                         <select
                             name="materialId"
                             value={formData.materialId}
-                            onChange={handleChange}
-                            className={`w-full px-2 py-1.5 text-sm border ${errors.materialId ? 'border-red-400' : 'border-gray-300'
-                                } rounded-md`}
+                            onChange={(e) => {
+                                handleChange(e);
+                                if (e.target.value === "otro") {
+                                    setIsOtherMaterial(true);
+                                } else {
+                                    setIsOtherMaterial(false);
+                                }
+                            }}
+                            className={`w-full px-2 py-1.5 text-sm border ${errors.materialId ? 'border-red-400' : 'border-gray-300'} rounded-md`}
                         >
                             <option value="">Seleccione un material...</option>
                             {isLoading ? (
@@ -92,9 +148,34 @@ export const MaterialRequestForm = () => {
                                     </option>
                                 ))
                             )}
+                            <option value="otro">Otro...</option>
                         </select>
+
                         {errors.materialId && <p className="mt-1 text-xs text-red-600">{errors.materialId}</p>}
                     </div>
+
+                    {isOtherMaterial && (
+                        <div className="space-y-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del nuevo material</label>
+                                <input
+                                    type="text"
+                                    value={newMaterial.name}
+                                    onChange={(e) => setNewMaterial({ ...newMaterial, name: e.target.value })}
+                                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Unidad del nuevo material</label>
+                                <input
+                                    type="text"
+                                    value={newMaterial.unit}
+                                    onChange={(e) => setNewMaterial({ ...newMaterial, unit: e.target.value })}
+                                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Cantidad y Unidad */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -185,6 +266,8 @@ export const MaterialRequestForm = () => {
                             <MaterialRequestModal
                                 requests={requests}
                                 isLoading={isLoadingMaterialRequests}
+                                onEdit={true}
+                                onDelete={true}
                             />
                         </div>
                         <button
@@ -201,16 +284,23 @@ export const MaterialRequestForm = () => {
                     isLoading={isLoadingMaterialRequests}
                 />
             </div>
+            {notification && (
+                <MessageModal
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(null)}
+                />
+            )}
         </>
     );
 };
 
-interface MaterialRequestProps {
+interface MaterialRequestPanelProps {
     requests: MaterialRequest[],
     isLoading: boolean
 }
 
-const MaterialRequestInfoPanel = ({ requests, isLoading }: MaterialRequestProps) => {
+const MaterialRequestInfoPanel = ({ requests, isLoading }: MaterialRequestPanelProps) => {
     return (
         <>
             <div className="md:w-80 flex-shrink-0">
@@ -252,9 +342,15 @@ const MaterialRequestInfoPanel = ({ requests, isLoading }: MaterialRequestProps)
     );
 };
 
+interface MaterialRequestProps {
+    requests: MaterialRequest[],
+    isLoading: boolean,
+    onEdit: boolean,
+    onDelete: boolean,
+}
 const ITEMS_PER_PAGE = 4;
 
-const MaterialRequestModal = ({ requests, isLoading }: MaterialRequestProps) => {
+const MaterialRequestModal = ({ requests, isLoading, onEdit, onDelete }: MaterialRequestProps) => {
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -349,8 +445,28 @@ const MaterialRequestModal = ({ requests, isLoading }: MaterialRequestProps) => 
                                                 key={req.id}
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow duration-200 bg-white"
+                                                className="relative border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow duration-200 bg-white"
                                             >
+                                                <div className="absolute bottom-2 right-2 flex gap-2">
+                                                    {onEdit && (
+                                                        <div>
+                                                            <FormEditMaterialRequest
+                                                             requestId={req.id}
+                                                             initialData={req}
+                                                             materialName={req.material.name}
+                                                            />
+                                                        </div>
+                                                    )}
+
+                                                    {onDelete && (
+                                                        <div>
+                                                            <FormDeleteMaterialRequest
+                                                                requestId={req.id}
+                                                                materialName={req.material.name}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <h4 className="font-medium text-gray-800">{req.material.name}</h4>
