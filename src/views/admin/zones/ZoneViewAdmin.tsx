@@ -72,7 +72,7 @@ export const ZoneViewAdmin = () => {
         <>
             <div className="flex justify-between flex-col md:flex-row">
                 <h2 className="text-2xl font-semibold text-gray-800 md:m-0 mx-auto">
-                    Gestión de Zonas
+                    Zonas de trabajo
                 </h2>
 
                 {/* Nueva Zona */}

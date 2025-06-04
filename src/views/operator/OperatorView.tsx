@@ -1,10 +1,10 @@
 import { Boxes } from "lucide-react";
 import { GenericView } from "../../components/GenericView"
-import MaterialRequests from "../MaterialRequests/MaterialRequests";
+import TaskManagement from "../TaskManagement/TaskManagement";
 
 const OperatorView = () => {
   const options = [
-    { id: 2, label: "Materiales", icon: <Boxes size={20} />, content: <MaterialRequests/> },
+    { id: 2, label: "Materiales", icon: <Boxes size={20} />, content: <TaskManagement/> },
   ];
 
   return (

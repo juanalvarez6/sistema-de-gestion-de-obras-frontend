@@ -17,7 +17,7 @@ export const FormAddProject = ({ onClose, onMesaje }: FormAddProjectProps) => {
     const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
     const { mutate: createProjectMutation, isSuccess: isSuccessAddProject, isPending: isPendingAddProject, isError: isErrorAddProject } = useCreateProject();
 
-    const { data: allUsersSupervisor } = useAllUsersSupervisor();
+    const { data: allUsersSupervisor } = useAllUsersSupervisor(true);
     const usersSupervisor = [...(allUsersSupervisor ?? [])].reverse();
 
     const [message, setMessage] = useState<string | null>(null);

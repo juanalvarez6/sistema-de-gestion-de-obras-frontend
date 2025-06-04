@@ -64,7 +64,7 @@ export const ProjectViewAdmin = () => {
         <>
             <div className="flex justify-between flex-wrap">
                 <h2 className="text-2xl font-semibold text-gray-800 md:m-0 mx-auto">
-                    Gestión de Proyectos
+                    Proyectos
                 </h2>
 
                 {/* Nuevo Proyecto */}

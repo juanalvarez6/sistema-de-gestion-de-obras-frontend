@@ -21,8 +21,6 @@ export const ZoneViewSupervisor = () => {
     const { data: allZones, isError, isLoading } = useMyWorkZones();
     const zones = [...(allZones ?? [])].reverse();
 
-
-
     const { data: projects } = useMyProjects(true);
 
     useWorkZoneSync();

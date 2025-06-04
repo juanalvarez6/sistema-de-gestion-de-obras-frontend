@@ -43,9 +43,9 @@ const UsersView = () => {
 
   return (
     <>
-      <div className="flex justify-between flex-wrap">
+      <div className="flex flex-col md:flex-row justify-between flex-wrap">
         <h2 className="text-2xl font-semibold text-gray-800 md:m-0 mx-auto">
-          Gestión de Usuarios
+          Usuarios
         </h2>
 
         <div className="my-4 sm:my-0 mx-auto md:m-0">
