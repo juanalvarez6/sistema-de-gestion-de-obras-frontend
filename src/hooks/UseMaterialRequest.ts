@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { materialRequestService } from "../services/MaterialRequestService";
 import { MaterialRequest, CreateMaterialRequest } from "../models/MaterialRequest";
 import { useAuth } from "../context/AuthProvider";
@@ -27,6 +27,7 @@ export const useCreateMaterialRequest = (): UseMutationResult<MaterialRequest, E
     mutationFn: (data) => materialRequestService.create(data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["materialsRequests"] });
+      queryClient.invalidateQueries({queryKey: ["materialsRequests", "by-user"]})
     },
     onError: (error) => {
       console.error("Error al crear la solicitud de materiale: ", error.message);
@@ -41,6 +42,7 @@ export const useUpdateMaterialRequest = () => {
     mutationFn: ({ id, data }) => materialRequestService.update(id, data, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["materialsRequests"] });
+      queryClient.invalidateQueries({queryKey: ["materialsRequests", "by-user"]})
     },
     onError: (error) => {
       console.error("Error al actualizar la solicitud de materiales:", error.message);
@@ -55,9 +57,22 @@ export const useDeleteMaterialRequest = () => {
     mutationFn: (id) => materialRequestService.delete(id, token!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["materialsRequests"] });
+      queryClient.invalidateQueries({queryKey: ["materialsRequests", "by-user"]})
     },
     onError: (error) => {
       console.error("Error al eliminar la solicitud de material:", error.message);
     },
+  });
+};
+
+export const useMaterialRequestsByUserId = (
+  userId: string
+): UseQueryResult<MaterialRequest[], Error> => {
+  const { token } = useAuth();
+
+  return useQuery<MaterialRequest[], Error>({
+    queryKey: ["materialsRequests", "by-user"],
+    queryFn: () => materialRequestService.getByUserId(userId, token!),
+    enabled: !!userId && !!token,
   });
 };

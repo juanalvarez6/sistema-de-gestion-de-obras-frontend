@@ -10,6 +10,8 @@ export interface MaterialRequest {
     requestDate: Date;
     comments: string;
     status: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+    materialQuality: 'ALTA' | 'MEDIA' | 'BAJA';
+    deliveryDate: string
 }
 
 export interface CreateMaterialRequest {
@@ -18,5 +20,6 @@ export interface CreateMaterialRequest {
     userId: string;
     requestedQuantity: number;
     comments: string;
-    status: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+    materialQuality: 'ALTA' | 'MEDIA' | 'BAJA';
+    deliveryDate: string
 }
