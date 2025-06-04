@@ -61,3 +61,45 @@ export const useDeleteInventory = () => {
     },
   });
 };
+
+export const useInventoriesByProject = (projectId: number) => {
+  const { token } = useAuth();
+
+  return useQuery<Inventory[], Error>({
+    queryKey: ["materialsByProject", projectId],
+    queryFn: () => inventoryService.getInventoriesByProjectId(projectId, token!),
+    enabled: !!projectId,
+  });
+};
+
+export const useAddQuantity = () => {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { id: number; amount: number }>({
+    mutationFn: ({ id, amount }) =>
+      inventoryService.addAvailableQuantity(id, amount, token!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventories"] });
+    },
+    onError: (error) => {
+      console.error("Error al aumentar cantidad:", error.message);
+    },
+  });
+};
+
+export const useSubtractQuantity = () => {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { id: number; amount: number }>({
+    mutationFn: ({ id, amount }) =>
+      inventoryService.subtractAvailableQuantity(id, amount, token!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventories"] });
+    },
+    onError: (error) => {
+      console.error("Error al reducir cantidad:", error.message);
+    },
+  });
+};

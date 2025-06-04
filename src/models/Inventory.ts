@@ -11,5 +11,4 @@ export interface Inventory {
 export interface CreateInventory {
     projectId: number;
     materialId: number;
-    availableQuantity: number;
 }
