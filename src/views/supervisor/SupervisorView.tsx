@@ -11,6 +11,7 @@ import { ProjectViewSupervisor } from "./projects/ProjectViewSupervisor";
 import { ZoneViewSupervisor } from "./zone/ZoneViewSupervisor";
 import { MaterialsView } from "../admin/materials/MaterialsView";
 import { InventoriesView } from "../admin/inventories/InventoryView";
+import MaterialRequestsViewAdmin from "../admin/materialrequests/MaterialRequestsViewAdmin";
 
 
 const SupervisorView = () => {
@@ -49,7 +50,7 @@ const SupervisorView = () => {
       id: 6,
       label: "Solicitudes de Materiales",
       icon: <FileInput size={20} />,
-      content: "Vista de Solicitudes de Materiales"
+      content: <MaterialRequestsViewAdmin/>
     }
   ];
 

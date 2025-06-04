@@ -1,6 +1,6 @@
-import TaskList from '../../components/TaskList';
-import { Task } from "../../models/Task";
-import { useMaterialRequests } from '../../context/MaterialRequestsContext';
+import TaskList from '../../../components/TaskList';
+import { Task } from "../../../models/Task";
+import { useMaterialRequests } from '../../../context/MaterialRequestsContext';
 
 const WorkerPanel = () => {
   const { requests } = useMaterialRequests();

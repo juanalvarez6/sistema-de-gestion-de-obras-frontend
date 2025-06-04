@@ -1,7 +1,7 @@
 import { CheckSquare, FileInput, House } from "lucide-react";
 import { GenericView } from "../../components/GenericView"
 import TaskManagement from "../TaskManagement/TaskManagement";
-import WorkerPanel from "../WorkerPanel/WorkerPanel";
+import WorkerPanel from "./WorkerPanel/WorkerPanel";
 import MaterialRequestsViewOperador from "./materialrequests/MaterialRequestsViewOperador";
 
 const OperatorView = () => {

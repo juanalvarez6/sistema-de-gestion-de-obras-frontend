@@ -1,6 +1,9 @@
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { MaterialRequest } from "../../../models/MaterialRequest";
+import { useAuth } from "../../../context/AuthProvider";
+import { useMyProjects, useProjects } from "../../../hooks/UseProjects";
+import { useMaterialRequestsByProjectIdsMap } from "../../../hooks/UseMaterialRequest";
+import { StatusSelector } from "./StatusSelector";
 
 const getQualityColor = (quality: 'ALTA' | 'MEDIA' | 'BAJA') => {
     switch (quality) {
@@ -12,103 +15,86 @@ const getQualityColor = (quality: 'ALTA' | 'MEDIA' | 'BAJA') => {
 };
 
 const MaterialRequestsViewAdmin = () => {
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'ADMINISTRADOR';
+    const isSupervisor = user?.role === 'SUPERVISOR';
 
-    const requests: MaterialRequest[] = [
-        {
-            id: 1,
-            material: {
-                id: 101,
-                name: 'Cemento',
-                unit: 'kg',
-            },
-            project: {
-                id: 201,
-                name: 'Construcción Edificio A',
-                description: 'Obra para edificio de oficinas',
-                latitude: 4.81333,
-                longitude: -75.69611,
-                locationRange: 100,
-                startDate: '2025-06-01',
-                endDate: '2025-12-31',
-                status: 'EN_PROGRESO',
-                userId: 'user123',
-                createdAt: '2025-05-01T08:00:00Z',
-            },
-            userId: 'user456',
-            requestedQuantity: 500,
-            requestDate: new Date('2025-06-03'),
-            comments: 'Necesario para la cimentación',
-            status: 'PENDIENTE',
-            materialQuality: 'ALTA',
-            deliveryDate: '2025-06-06',
-        },
-        {
-            id: 2,
-            material: {
-                id: 102,
-                name: 'Arena',
-                unit: 'm3',
-            },
-            project: {
-                id: 202,
-                name: 'Urbanización Los Pinos',
-                description: 'Construcción de viviendas',
-                latitude: 4.81444,
-                longitude: -75.69444,
-                locationRange: 150,
-                startDate: '2025-04-15',
-                endDate: '2025-11-30',
-                status: 'EN_PROGRESO',
-                userId: 'user789',
-                createdAt: '2025-04-01T10:30:00Z',
-            },
-            userId: 'user321',
-            requestedQuantity: 20,
-            requestDate: new Date('2025-06-02'),
-            comments: 'Preparación de mezcla para pisos',
-            status: 'APROBADA',
-            materialQuality: 'MEDIA',
-            deliveryDate: '2025-06-05',
-        },
-    ];
+    const { data: adminProjects } = useProjects(isAdmin);
+    const { data: supervisorProjects } = useMyProjects(isSupervisor);
+    const projects = (isAdmin ? adminProjects : supervisorProjects) ?? [];
 
-
-    const isLoading = false;
+    const projectIds = projects.map(p => p.id);
+    const { materialRequestsMap, isLoading } = useMaterialRequestsByProjectIdsMap(projectIds);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedProjectId, setSelectedProjectId] = useState<number | "ALL">("ALL");
 
+    // Aplanar solicitudes
+    const allRequests = useMemo(() => {
+        return Object.entries(materialRequestsMap).flatMap(([projectId, requests]) =>
+            Array.isArray(requests)
+                ? requests.map(req => ({ ...req, projectId: Number(projectId) }))
+                : []
+        );
+    }, [materialRequestsMap]);
+
+    // Aplicar filtro por proyecto
+    const filteredByProject = useMemo(() => {
+        return selectedProjectId === "ALL"
+            ? allRequests
+            : allRequests.filter(req => req.projectId === selectedProjectId);
+    }, [allRequests, selectedProjectId]);
+
+    // Aplicar filtro por búsqueda
     const filteredRequests = useMemo(() => {
-        return requests.filter((req) =>
+        return filteredByProject.filter((req) =>
             req.material.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [requests, searchTerm]);
+    }, [filteredByProject, searchTerm]);
+
+    const ITEMS_PER_PAGE = 4;
+    const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
+
+    const paginatedRequests = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredRequests.slice(start, start + ITEMS_PER_PAGE);
+    }, [filteredRequests, currentPage]);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1);
     };
 
-    const ITEMS_PER_PAGE = 4;
-
-    const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
-    const paginatedRequests = useMemo(() => {
-        const start = (currentPage - 1) * ITEMS_PER_PAGE;
-        return filteredRequests.slice(start, start + ITEMS_PER_PAGE);
-    }, [filteredRequests, currentPage]);
+    const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setSelectedProjectId(value === "ALL" ? "ALL" : Number(value));
+        setCurrentPage(1);
+    };
 
     return (
         <>
-            <div className="p-4 border-b border-gray-200">
-                <div className="mt-3">
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        placeholder="Buscar por material..."
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                </div>
+            <div className="p-4 border-b border-gray-200 space-y-3">
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    placeholder="Buscar por material..."
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+
+                <select
+                    value={selectedProjectId}
+                    onChange={handleProjectChange}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                    <option value="ALL">Todos los proyectos</option>
+                    {projects.map(project => (
+                        <option key={project.id} value={project.id}>
+                            {project.name}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div className="overflow-y-auto flex-1 p-4">
@@ -134,8 +120,8 @@ const MaterialRequestsViewAdmin = () => {
                                         <h4 className="font-medium text-gray-800">{req.material.name}</h4>
                                         <div className="flex items-center mt-1 space-x-2">
                                             <span className={`text-xs px-2 py-1 rounded-full ${req.status === "PENDIENTE" ? "bg-yellow-100 text-yellow-800" :
-                                                req.status === "APROBADA" ? "bg-green-100 text-green-800" :
-                                                    "bg-red-100 text-red-800"
+                                                    req.status === "APROBADA" ? "bg-green-100 text-green-800" :
+                                                        "bg-red-100 text-red-800"
                                                 }`}>
                                                 {req.status}
                                             </span>
@@ -144,9 +130,7 @@ const MaterialRequestsViewAdmin = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <span className="text-xs text-gray-500">
-                                        ID: {req.id}
-                                    </span>
+                                    <span className="text-xs text-gray-500">ID: {req.id}</span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 mt-3 text-sm">
@@ -172,6 +156,10 @@ const MaterialRequestsViewAdmin = () => {
                                         <p className="text-sm text-gray-700 italic">{req.comments}</p>
                                     </div>
                                 )}
+                                <StatusSelector
+                                    id={req.id}
+                                    currentStatus={req.status}
+                                />
                             </motion.div>
                         ))}
                     </div>
@@ -200,7 +188,7 @@ const MaterialRequestsViewAdmin = () => {
                 </div>
             )}
         </>
-    )
-}
+    );
+};
 
-export default MaterialRequestsViewAdmin
+export default MaterialRequestsViewAdmin;
