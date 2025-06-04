@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useUpdateUser } from "../../hooks/UseUser";
-import { RegisterUserDto } from "../../models/UserResponse";
-import { GenericModalForm } from "../../components/FormCommon";
-import { MessageModal, MessageType } from "../../components/MessageModal";
+import { useUpdateUser } from "../../../hooks/UseUser";
+import { RegisterUserDto } from "../../../models/UserResponse";
+import { GenericModalForm } from "../../../components/FormCommon";
+import { MessageModal, MessageType } from "../../../components/MessageModal";
+import { useAuth } from "../../../context/AuthProvider";
 
 interface FormUpdateUserProps {
     onClose: () => void;
@@ -23,6 +24,8 @@ export const FormUpdateUser = ({
     const [formData, setFormData] = useState<RegisterUserDto>(initialData);
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<MessageType>("error");
+
+    const {user}  = useAuth();
 
     const handleClose = () => {
         setTimeout(onClose, 300);
@@ -95,7 +98,7 @@ export const FormUpdateUser = ({
                         />
                     </div>
 
-                    {isAdmin && (
+                    {isAdmin && userId !== user?.id &&  (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
                             <select

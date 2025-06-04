@@ -2,7 +2,7 @@ import { Mail, BadgeInfo, UserCircle, Pencil } from "lucide-react";
 import { UserResponseDto } from "../models/UserResponse";
 import { useState } from "react";
 import { MessageModal, MessageType } from "./MessageModal";
-import { FormUpdateUser } from "../views/Login/FormEditUser";
+import { FormUpdateUser } from "../views/admin/users/FormEditUser";
 import { useAuth } from "../context/AuthProvider";
 
 interface Props {

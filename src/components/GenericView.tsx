@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Menu, CircleUserRound, X, Pencil } from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
 import LogoutButton from "./LogoutButton";
-import { FormUpdateUser } from "../views/Login/FormEditUser";
+import { FormUpdateUser } from "../views/admin/users/FormEditUser";
 import { MessageModal, MessageType } from "./MessageModal";
 
 interface Option {
